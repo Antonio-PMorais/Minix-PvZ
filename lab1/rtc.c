@@ -1,6 +1,6 @@
-#include <minix/syslib.h>
-#include <lcom/lcf.h>
 #include "rtc.h"
+#include <minix/syslib.h>
+#include <stdbool.h>
 
 #define TODO return -1
 
@@ -14,47 +14,52 @@
 #define RTC_UIP_MSK (1 << 7)
 #define RTC_DM_MSK (1 << 2)
 
-static int bcd_to_bin(uint8_t bcd) {
-  return (bcd & 0x0F) + ((bcd >> 4) * 10);
+static int bdc_to_bin(uint8_t bcd) {
+  uint8_t first_digit, second_digit;
+  first_digit = (bcd & 0xF0)>>4;
+  second_digit = (bcd & 0x0F);
+  return first_digit * 10 + second_digit;
 }
 
 int rtc_read_date(rtc_date *date) {
-  uint32_t uid, dm, sec, min, hour, day, month, year;
-  
-  do{
-    sys_outb(0x70, 0x0A);
-    sys_inb(0x71, &uid);
-  } while (uid & 0x80);
+  uint32_t value;
 
-  sys_outb(0x70, 0x0B);
-  sys_inb(0x71, &dm);
+  // Wait for the UIP bit to be 0
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_A) != 0) {return 1;}
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
 
-  sys_outb(0x70, 0x00);
-  sys_inb(0x71, &sec);
-
-  sys_outb(0x70, 0x02);
-  sys_inb(0x71, &min);
-
-  sys_outb(0x70, 0x04);
-  sys_inb(0x71, &hour);
-
-  sys_outb(0x70, 0x07);
-  sys_inb(0x71, &day);
-
-  sys_outb(0x70, 0x08);
-  sys_inb(0x71, &month);
-
-  sys_outb(0x70, 0x09);
-  sys_inb(0x71, &year);
-
-  if (!(dm & 0x04)) {
-    day   = bcd_to_bin(day);
-    month = bcd_to_bin(month);
-    year  = bcd_to_bin(year);
+  while (value & RTC_UIP_MSK) {
+    if (sys_outb(RTC_ADDR_REG, RTC_REG_A) != 0) {return 1;}
+    if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
   }
 
+  // Check for BCD format
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_B) != 0) {return 1;}
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  bool is_bcd_format = !(value & RTC_DM_MSK);
+
+  // Read the day
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_DAY) != 0) {return 1;}
+
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  uint8_t day = (uint8_t) value;
+  if (is_bcd_format) {day = bdc_to_bin(day);}
   date->day = day;
+
+  // Read the month
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_MONTH) != 0) {return 1;}
+
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  uint8_t month = (uint8_t) value;
+  if (is_bcd_format) {month = bdc_to_bin(month);}
   date->month = month;
+
+  // Read the year
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_YEAR) != 0) {return 1;}
+
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  uint8_t year = (uint8_t) value;
+  if (is_bcd_format) {year = bdc_to_bin(year);}
   date->year = year;
 
   return 0;
