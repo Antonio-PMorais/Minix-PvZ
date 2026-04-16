@@ -8,6 +8,10 @@
 #include "i8042.h"
 #include "keyboard.h"
 
+int (timer_subscribe_int)(uint8_t *bit_no);
+int (timer_unsubscribe_int)();
+void (timer_int_handler)();
+
 extern uint32_t sys_inb_counter;
 
 int main(int argc, char *argv[]) {
@@ -79,25 +83,81 @@ int(kbd_test_scan)() {
     }
   }
 
-  // 3. Retira a subscrição das interrupções antes de sair
   if (kbd_unsubscribe_int() != 0) return 1;
 
-  // 4. Imprime o número total de chamadas à função sys_inb
   kbd_print_no_sysinb(sys_inb_counter); 
 
   return 0;
 }
 
-int(kbd_test_poll)() {
-  /* To be completed by the students */
-  printf("%s is not yet implemented!\n", __func__);
 
-  return 1;
+int (kbd_test_timed_scan)(uint8_t n) {
+  uint8_t kbd_bit, timer_bit;
+  int ipc_status;
+  message msg;
+  uint8_t bytes[2];
+  int size = 0;
+  
+  extern uint32_t timer_counter; 
+  timer_counter = 0;
+
+  if (kbd_subscribe_int(&kbd_bit) != 0) return 1;
+  if (timer_subscribe_int(&timer_bit) != 0) return 1;
+
+  while (kbd_get_scancode() != ESC_BREAKCODE && (timer_counter / 60) < n) {
+    if (driver_receive(ANY, &msg, &ipc_status) != 0) continue;
+    
+    if (is_ipc_notify(ipc_status)) {
+      if (_ENDPOINT_P(msg.m_source) == HARDWARE) {
+        
+        if (msg.m_notify.interrupts & BIT(kbd_bit)) {
+          kbc_ih();
+          uint8_t code = kbd_get_scancode();
+          bytes[size++] = code;
+          
+          if (code != TWO_BYTE_CODE) {
+            kbd_print_scancode(!(code & MAKECODE_BIT), size, bytes);
+            size = 0;
+          }
+          timer_counter = 0;
+        }
+
+        if (msg.m_notify.interrupts & BIT(timer_bit)) {
+          timer_int_handler();
+        }
+      }
+    }
+  }
+
+  kbd_unsubscribe_int();
+  timer_unsubscribe_int();
+  
+  return kbd_print_no_sysinb(sys_inb_counter);
 }
 
-int(kbd_test_timed_scan)(uint8_t n) {
-  /* To be completed by the students */
-  printf("%s is not yet implemented!\n", __func__);
+int (kbd_test_poll)() {
+  uint8_t bytes[2];
+  int size = 0;
+  uint8_t status;
 
-  return 1;
+  while (kbd_get_scancode() != ESC_BREAKCODE) {
+    if (util_sys_inb(KBC_STATUS_REG, &status) != 0) return 1;
+
+    if (status & KBC_OBF) {
+      if ((status & (KBC_PAR_ERR | KBC_TO_ERR)) == 0) {
+        kbc_ih();
+        uint8_t code = kbd_get_scancode();
+        bytes[size++] = code;
+
+        if (code == TWO_BYTE_CODE) continue;
+
+        kbd_print_scancode(!(code & MAKECODE_BIT), size, bytes);
+        size = 0;
+      }
+    }
+    tickdelay(micros_to_ticks(20000)); 
+  }
+
+  kbc_restore_interrupts();
+  return kbd_print_no_sysinb(sys_inb_counter);
 }

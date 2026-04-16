@@ -11,4 +11,6 @@ void (kbc_ih)();
 uint8_t (kbd_get_scancode)();
 bool (kbd_has_error)();
 
+int (kbc_restore_interrupts)();
+
 #endif
