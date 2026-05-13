@@ -55,3 +55,32 @@ void *(vg_init)(uint16_t mode) {
 
     return video_mem;
 }
+
+int (vg_draw_pixel)(uint16_t x, uint16_t y, uint32_t color) {
+    //check out of bounds
+    if (x >= vmi_p.XResolution || y >= vmi_p.YResolution) {
+        return 0; 
+    }
+
+    unsigned int bytes_per_pixel = (vmi_p.BitsPerPixel + 7) / 8;
+    unsigned int index = (vmi_p.XResolution * y + x) * bytes_per_pixel;
+
+    //moving the exact number of bytes needed
+    memcpy((uint8_t*)video_mem + index, &color, bytes_per_pixel);
+
+    return 0;
+}
+
+int (vg_draw_hline)(uint16_t x, uint16_t y, uint16_t len, uint32_t color) {
+    for (unsigned i = 0; i < len; i++) {
+        vg_draw_pixel(x + i, y, color);
+    }
+    return 0;
+}
+
+int (vg_draw_rectangle)(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color) {
+    for (unsigned i = 0; i < height; i++) {
+        vg_draw_hline(x, y + i, width, color);
+    }
+    return 0;
+}
