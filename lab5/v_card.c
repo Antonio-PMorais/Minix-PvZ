@@ -84,3 +84,15 @@ int (vg_draw_rectangle)(uint16_t x, uint16_t y, uint16_t width, uint16_t height,
     }
     return 0;
 }
+
+int (vg_draw_xpm)(xpm_image_t img, uint8_t *pixmap, uint16_t x, uint16_t y) {
+    for (int i = 0; i < img.height; i++) {
+        for (int j = 0; j < img.width; j++) {
+            // For XPM_INDEXED mode, each pixel in the array represents a 1-byte color index
+            if (vg_draw_pixel(x + j, y + i, pixmap[i * img.width + j]) != 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}

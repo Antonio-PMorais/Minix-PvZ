@@ -102,8 +102,61 @@ int(video_test_rectangle)(uint16_t mode, uint16_t x, uint16_t y,
 }
 
 int(video_test_xpm)(xpm_map_t xpm, uint16_t x, uint16_t y) {
-    /* To be completed */
-    printf("%s(%8p, %u, %u): under construction\n", __func__, xpm, x, y);
+    xpm_image_t img;
+    uint8_t *pixmap;
+    
+    pixmap = xpm_load(xpm, XPM_INDEXED, &img);
+    if (pixmap == NULL) {
+        printf("Failed to load XPM image.\n");
+        return 1;
+    }
 
-    return 1;
+    if (vg_init(0x105) == NULL) {
+        printf("Failed to initialize VBE mode 0x105.\n");
+        return 1;
+    }
+
+    if (vg_draw_xpm(img, pixmap, x, y) != 0) {
+        vg_exit();
+        return 1;
+    }
+
+    int ipc_status, r;
+    message msg;
+    uint8_t bit_no;
+
+    if (kbd_subscribe_int(&bit_no) != 0) {
+        vg_exit();
+        return 1;
+    }
+    uint32_t irq_set = BIT(bit_no);
+
+    while (kbd_get_scancode() != ESC_BREAKCODE) {
+        if ((r = driver_receive(ANY, &msg, &ipc_status)) != 0) { 
+            printf("driver_receive failed with: %d", r);
+            continue;
+        }
+        if (is_ipc_notify(ipc_status)) {
+            switch (_ENDPOINT_P(msg.m_source)) {
+                case HARDWARE: 
+                    if (msg.m_notify.interrupts & irq_set) {
+                        kbc_ih();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    if (kbd_unsubscribe_int() != 0) {
+        vg_exit();
+        return 1;
+    }
+
+    if (vg_exit() != OK) {
+        return 1;
+    }
+
+    return 0;
 }
