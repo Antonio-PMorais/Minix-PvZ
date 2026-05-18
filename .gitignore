@@ -1,0 +1,12 @@
+# Ignore files with no extension
+*
+!*.*
+!*/
+!Makefile
+
+*.d
+*.o
+output.txt
+
+.depend
+.gdbinit
