@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "proj.h"
+#include "game.h"
 
 #include <lcom/timer.h>
 #include "keyboard.h"
@@ -15,6 +16,11 @@ uint8_t timer_bit_no;
 uint8_t kbd_bit_no;
 uint8_t mouse_bit_no;
 uint8_t rtc_bit_no;
+
+// Mouse packet assembly — the mouse sends 3 bytes per event
+static uint8_t mouse_bytes[3];
+static uint8_t mouse_byte_idx = 0;
+
 
 int system_init() {
     if (timer_set_frequency(0, FPS) != 0) {
@@ -107,7 +113,61 @@ int(proj_main_loop)(int argc, char *argv[]) {
         return 1;
     }
 
-    sleep(3);
+    game_init();
+
+    int ipc_status;
+    message msg;
+
+    while (!game_should_quit()) {
+        if (driver_receive(ANY, &msg, &ipc_status) != 0) continue;
+
+        if (is_ipc_notify(ipc_status)) {
+            switch (_ENDPOINT_P(msg.m_source)) {
+                case HARDWARE:
+                    // --- Timer interrupt: drive game logic and rendering ---
+                    if (msg.m_notify.interrupts & BIT(timer_bit_no)) {
+                        timer_int_handler();
+                        if (timer_counter % (60 / FPS) == 0) {
+                            game_update();   // logic
+                            game_render();   // draw
+                        }
+                    }
+                    // --- Keyboard interrupt ---
+                    if (msg.m_notify.interrupts & BIT(kbd_bit_no)) {
+                        kbc_ih();
+                        
+                        if (!kbd_has_error()) {
+                            game_on_key(kbd_get_scancode());
+                        }
+                    }
+                    if (msg.m_notify.interrupts & BIT(mouse_bit_no)) {
+                        mouse_ih();
+ 
+                        if (!mouse_error) {
+                            // The first byte of a packet always has bit 3 set.
+                            // Use this to re-sync if we ever lose track.
+                            if (mouse_byte_idx == 0 && !(mouse_byte & BIT(3))) {
+                                // Out of sync — discard byte and wait for a valid first byte
+                                continue;
+                            }
+            
+                            mouse_bytes[mouse_byte_idx++] = mouse_byte;
+            
+                            if (mouse_byte_idx == 3) {
+                                mouse_byte_idx = 0;
+            
+                                struct packet pp;
+                                mouse_parse_packet(&pp, mouse_bytes);
+                                game_on_mouse(&pp);
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
+    printf("Shutting down...\n");
 
     if (system_cleanup() != 0) {
         printf("Failed to reset Minix state.\n");
