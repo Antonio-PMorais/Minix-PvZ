@@ -128,7 +128,7 @@ void game_update() {
 
             if (spawn_timer >= (uint32_t) interval) {
                 spawn_timer = 0;
-                spawn_zombie(timer_counter % GRID_ROWS, level);
+                spawn_zombie(rand() % GRID_ROWS, level);
                 zombies_to_spawn--;
 
                 if (zombies_to_spawn == 0) {
@@ -221,11 +221,12 @@ void game_render() {
         font_draw_string("LVL:", 400, 15, 0xFFFFFF);
         font_draw_number(level, 450, 15, 0xFFFFFF);
 
-        if (selected_plant == 1) {
-            font_draw_string("1-SUN", 10, 60, 0xFFFF00);
-        } else {
-            font_draw_string("2-PEA", 10, 60, 0x00FF00);
-        }
+        //draw pant options
+        uint32_t sun_color = (selected_plant == 1) ? 0xFFFF00 : 0x888888;
+        uint32_t pea_color = (selected_plant == 2) ? 0x00FF00 : 0x888888;
+
+        font_draw_string("1-SUN", 10, 60, sun_color);
+        font_draw_string("2-PEA", 110, 60, pea_color);
 
         if (frozen) {
             font_draw_string("FROZEN", 500, 60, 0x0000FF);

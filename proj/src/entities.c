@@ -188,17 +188,22 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
                     // only shoot if zombie in lane
 
                     bool has_zombie = false;
+                    int plant_x = GRID_START_X + c * CELL_SIZE;
 
-                    for (int z = 0; z < MAX_ZOMBIES; z++)
+                    for (int z = 0; z < MAX_ZOMBIES; z++){
 
-                        if (zombies[z].active && zombies[z].lane == r) { has_zombie = true; break; }
-
+                        if (zombies[z].active && zombies[z].lane == r) {
+                            if (zombies[z].x > plant_x) {
+                                has_zombie = true; 
+                                break;
+                            }
+                        }
+                    }
                     if (has_zombie) {
 
-                        int px = GRID_START_X + c * CELL_SIZE + CELL_SIZE;
-
+                        grid[r][c].shoot_timer = 0;
+                        int px = plant_x + CELL_SIZE;
                         int py = 150 + r * CELL_SIZE + CELL_SIZE / 2;
-
                         spawn_projectile(r, px, py);
 
                     }
@@ -332,6 +337,10 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
             zombies[z].eat_timer = 0;
 
             zombies[z].x -= zombies[z].speed;
+
+            if (tc % 500 == 0) {
+                zombies[z].x -= zombies[z].speed;
+            }
 
         }
 
