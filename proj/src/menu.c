@@ -44,6 +44,8 @@ void menu_on_mouse(struct packet *pp, int mouse_x, int mouse_y) {
         
         if (mouse_x >= BTN_PLAY_X && mouse_x <= BTN_PLAY_X + BTN_W && 
             mouse_y >= BTN_PLAY_Y && mouse_y <= BTN_PLAY_Y + BTN_H) {
+
+            game_init();
             game_change_state(PLAYING);
         }
 

@@ -96,6 +96,8 @@ void game_init() {
     }
 
     rtc_read_date(&current_time);
+
+    srand(current_time.seconds + current_time.minutes * 60);
 }
 
 void game_update() {
@@ -296,26 +298,28 @@ void game_on_mouse(struct packet *pp) {
         else if (current_state == PLAYING) {
         if (pp->lb && !prev_lb) {
             // try to collect sun first
-            entities_collect_sun(mouse_x, mouse_y, &suns_count);
+            bool sun_collected = entities_collect_sun(mouse_x, mouse_y, &suns_count);
 
             // plant only if click is inside the grid
-            if (mouse_x >= GRID_START_X &&
-                mouse_x < GRID_START_X + GRID_COLS * CELL_SIZE &&
-                mouse_y >= GRID_START_Y &&
-                mouse_y < GRID_START_Y + GRID_ROWS * CELL_SIZE) {
+            if(!sun_collected){
+                if (mouse_x >= GRID_START_X &&
+                    mouse_x < GRID_START_X + GRID_COLS * CELL_SIZE &&
+                    mouse_y >= GRID_START_Y &&
+                    mouse_y < GRID_START_Y + GRID_ROWS * CELL_SIZE) {
 
-                int col = (mouse_x - GRID_START_X) / CELL_SIZE;
-                int row = (mouse_y - GRID_START_Y) / CELL_SIZE;
+                    int col = (mouse_x - GRID_START_X) / CELL_SIZE;
+                    int row = (mouse_y - GRID_START_Y) / CELL_SIZE;
 
-                if (plant_grid[row][col].type == 0) {
-                    int cost = selected_plant == 1 ? 50 : 100;
+                    if (plant_grid[row][col].type == 0) {
+                        int cost = selected_plant == 1 ? 50 : 100;
 
-                    if (suns_count >= cost) {
-                        plant_grid[row][col].type = selected_plant;
-                        plant_grid[row][col].hp = 100;
-                        plant_grid[row][col].shoot_timer = 0;
-                        plant_grid[row][col].sun_timer = 0;
-                        suns_count -= cost;
+                        if (suns_count >= cost) {
+                            plant_grid[row][col].type = selected_plant;
+                            plant_grid[row][col].hp = 100;
+                            plant_grid[row][col].shoot_timer = 0;
+                            plant_grid[row][col].sun_timer = 0;
+                            suns_count -= cost;
+                        }
                     }
                 }
             }
