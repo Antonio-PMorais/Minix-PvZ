@@ -62,11 +62,6 @@ int system_init() {
 int system_cleanup() {
     int errors = 0;
 
-    if (vg_exit() != 0) {
-        printf("Error: Failed to exit video mode.\n");
-        errors = 1;
-    }
-
     if (mouse_disable_data_report() != 0) {
         printf("Error: Failed to disable Mouse data reporting.\n");
         errors = 1;
@@ -89,6 +84,22 @@ int system_cleanup() {
     if (rtc_unsubscribe_int() != 0) {
         printf("Error: Failed to unsubscribe RTC.\n");
         errors = 1;
+    }
+
+    if (vg_exit() != 0) {
+        printf("Error: Failed to exit video mode.\n");
+        errors = 1;
+    }
+
+    // flush pensing keyboard inputs
+    uint8_t status, trash;
+    while (1) {
+        util_sys_inb(0x64, &status);
+        if (status & BIT(0)) { 
+            util_sys_inb(0x60, &trash); 
+        } else {
+            break;
+        }
     }
 
     return errors;

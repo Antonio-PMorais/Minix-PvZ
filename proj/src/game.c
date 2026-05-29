@@ -44,6 +44,7 @@ static int level = 1;
 static int selected_plant = 1;  // 1=sunflower, 2=peashooter
 static bool frozen = false;
 static uint32_t freeze_timer = 0;
+static int suns_spent = 0;
 
 // wave spawning
 static int zombies_to_spawn = 0;
@@ -85,6 +86,7 @@ void game_init() {
     spawn_timer = 0;
     wave_active = false;
     rtc_timer = 0;
+    suns_spent = 0;
 
     for (int r = 0; r < GRID_ROWS; r++) {
         for (int c = 0; c < GRID_COLS; c++) {
@@ -121,9 +123,10 @@ void game_update() {
         if (wave_active && zombies_to_spawn > 0) {
             spawn_timer++;
 
-            int interval = 180 - level * 15;
-            if (interval < 60) {
-                interval = 60;
+            int interval = 780 - level * 150; 
+            
+            if (interval < 45) {
+                interval = 45;
             }
 
             if (spawn_timer >= (uint32_t) interval) {
@@ -152,7 +155,11 @@ void game_update() {
         }
 
         if (!wave_active && entities_zombies_alive() == 0 && level > 0) {
-            level++;
+            if (level == 3) {
+                current_state = LEVEL_COMPLETE;
+            } else {
+                level++;
+            }
         }
 
         rtc_timer++;
@@ -246,6 +253,38 @@ void game_render() {
 
         font_draw_string(ts, 680, 15, 0xFFFFFF);
     }
+    else if (current_state == LEVEL_COMPLETE) {
+        vg_clear(COLOR_BG);
+
+        vg_draw_rectangle(0, 0, SCREEN_W, 100, COLOR_UI);
+
+        // draw grid
+        for (int r = 0; r < GRID_ROWS; r++) {
+            for (int c = 0; c < GRID_COLS; c++) {
+                int cell_x = GRID_START_X + c * CELL_SIZE;
+                int cell_y = GRID_START_Y + r * CELL_SIZE;
+
+                vg_draw_rectangle(
+                    cell_x + 2,
+                    cell_y + 2,
+                    CELL_SIZE - 4,
+                    CELL_SIZE - 4,
+                    COLOR_CELL
+                );
+            }
+        }
+        
+        // draw results
+        font_draw_string("LEVEL COMPLETE!", 300, 250, 0xFF0000);
+        
+        font_draw_string("SUNS SPENT:", 300, 300, 0xFF0000);
+        font_draw_number(suns_spent, 450, 300, 0xFF0000);
+
+        font_draw_string("PRESS ESC TO RETURN", 250, 400, 0xFF0000);
+        
+        vg_flip();
+    }
+
 
     // draw mouse 
     vg_draw_rectangle(mouse_x - CURSOR_SIZE / 2, mouse_y - 1, CURSOR_SIZE, 2, COLOR_CURSOR);
@@ -261,7 +300,8 @@ bool game_should_quit() {
 void game_on_key(uint8_t scancode) {
     if (current_state == MAIN_MENU) {
         menu_on_key(scancode);
-        } else if (current_state == PLAYING) {
+
+    } else if (current_state == PLAYING) {
         if (scancode == ESC_BREAKCODE) {
             current_state = MAIN_MENU;
         }
@@ -277,6 +317,11 @@ void game_on_key(uint8_t scancode) {
         if (scancode == 0x39 && !frozen) {
             frozen = true;
             freeze_timer = 180;
+        }
+
+    } else if (current_state == LEVEL_COMPLETE) {
+        if (scancode == ESC_BREAKCODE) {
+            current_state = MAIN_MENU;
         }
     }
 }
@@ -316,10 +361,11 @@ void game_on_mouse(struct packet *pp) {
 
                         if (suns_count >= cost) {
                             plant_grid[row][col].type = selected_plant;
-                            plant_grid[row][col].hp = 100;
+                            plant_grid[row][col].hp = 300;
                             plant_grid[row][col].shoot_timer = 0;
                             plant_grid[row][col].sun_timer = 0;
                             suns_count -= cost;
+                            suns_spent += cost;
                         }
                     }
                 }
