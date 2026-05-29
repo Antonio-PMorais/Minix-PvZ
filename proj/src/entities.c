@@ -52,9 +52,9 @@ void spawn_zombie(uint8_t lane, int level) {
 
             zombies[i].lane = lane;
 
-            zombies[i].hp = 80 + level * 20;
+            zombies[i].hp = 250 + level * 20;
 
-            zombies[i].speed = 1;
+            zombies[i].speed = 2;
 
             zombies[i].eating = false;
 
@@ -181,7 +181,7 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 
                 grid[r][c].shoot_timer++;
 
-                if (grid[r][c].shoot_timer >= 90) {
+                if (grid[r][c].shoot_timer >= 84) {
 
                     grid[r][c].shoot_timer = 0;
 
@@ -216,7 +216,7 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 
                 grid[r][c].sun_timer++;
 
-                if (grid[r][c].sun_timer >= 360) {
+                if (grid[r][c].sun_timer >= 1440) {
 
                     grid[r][c].sun_timer = 0;
 
@@ -314,11 +314,11 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 
             zombies[z].eat_timer++;
 
-            if (zombies[z].eat_timer >= 30) {
+            if (zombies[z].eat_timer >= 60) {
 
                 zombies[z].eat_timer = 0;
 
-                grid[row][col].hp -= 10;
+                grid[row][col].hp -= 100;
 
                 if (grid[row][col].hp <= 0) {
 
@@ -336,9 +336,7 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 
             zombies[z].eat_timer = 0;
 
-            zombies[z].x -= zombies[z].speed;
-
-            if (tc % 500 == 0) {
+            if (tc % 7 == 0) {
                 zombies[z].x -= zombies[z].speed;
             }
 

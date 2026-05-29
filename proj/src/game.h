@@ -7,7 +7,8 @@
 
 typedef enum {
     MAIN_MENU,
-    PLAYING
+    PLAYING,
+    LEVEL_COMPLETE
 } GameState;
 
 void game_init();
