@@ -94,7 +94,7 @@ void spawn_projectile(uint8_t lane, int16_t x, int16_t y) {
 }
 
 
-void spawn_sun(int16_t x, int16_t target_y) {
+void spawn_sun(int16_t x, int16_t start_y, int16_t target_y) {
 
     for (int i = 0; i < MAX_SUNS; i++) {
 
@@ -104,7 +104,7 @@ void spawn_sun(int16_t x, int16_t target_y) {
 
             suns_array[i].x = x;
 
-            suns_array[i].y = 0;
+            suns_array[i].y = start_y;
 
             suns_array[i].target_y = target_y;
 
@@ -220,11 +220,11 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 
                     grid[r][c].sun_timer = 0;
 
-                    int sx = GRID_START_X + c * CELL_SIZE + CELL_SIZE / 2;
+                    int sx = GRID_START_X + c * CELL_SIZE + 20 + (rand() % 40);
 
-                    int sy = 150 + r * CELL_SIZE;
+                    int sy = 150 + r * CELL_SIZE + 20 + (rand() % 40);
 
-                    spawn_sun(sx, sy);
+                    spawn_sun(sx, sy, sy);
 
                 }
 
@@ -362,7 +362,7 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 
         int16_t sx = GRID_START_X + (rand() % (GRID_COLS * CELL_SIZE));
         int16_t sy = 150 + (rand() % (5 * CELL_SIZE));
-        spawn_sun(sx, sy);
+        spawn_sun(sx, 0, sy);
 
     }
 

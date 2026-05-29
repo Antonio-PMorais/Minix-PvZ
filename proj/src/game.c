@@ -121,9 +121,9 @@ void game_update() {
         if (wave_active && zombies_to_spawn > 0) {
             spawn_timer++;
 
-            int interval = 180 - level * 15;
-            if (interval < 60) {
-                interval = 60;
+            int interval = 300 - level * 15;
+            if (interval < 120) {
+                interval = 120;
             }
 
             if (spawn_timer >= (uint32_t) interval) {

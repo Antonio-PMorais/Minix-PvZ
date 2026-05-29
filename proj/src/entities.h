@@ -54,7 +54,7 @@ void entities_init();
 // spawn
 void spawn_zombie(uint8_t lane, int level);
 void spawn_projectile(uint8_t lane, int16_t x, int16_t y);
-void spawn_sun(int16_t x, int16_t target_y);
+void spawn_sun(int16_t x, int16_t start_y, int16_t target_y);
 
 // update — returns true if game over (zombie reached left edge)
 bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
