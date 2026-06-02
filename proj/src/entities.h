@@ -11,6 +11,12 @@ extern uint8_t *sunflower_pixmap;
 extern xpm_image_t sun_img;
 extern uint8_t *sun_pixmap;
 
+extern xpm_image_t peashooter_projectile_img;
+extern uint8_t *peashooter_projectile_pixmap;
+
+extern xpm_image_t zombie_default_img;
+extern uint8_t *zombie_default_pixmap;
+
 // max counts
 #define MAX_ZOMBIES      20
 #define MAX_PROJECTILES  30

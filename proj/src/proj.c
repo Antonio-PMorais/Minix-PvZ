@@ -66,6 +66,7 @@ int system_cleanup() {
         printf("Error: Failed to disable Mouse data reporting.\n");
         errors = 1;
     }
+
     if (mouse_unsubscribe_int() != 0) {
         printf("Error: Failed to unsubscribe Mouse.\n");
         errors = 1;
@@ -85,6 +86,12 @@ int system_cleanup() {
         printf("Error: Failed to unsubscribe RTC.\n");
         errors = 1;
     }
+
+    if (vg_exit() != 0) {
+        printf("Error: Failed to exit video mode.\n");
+        errors = 1;
+    }
+
 
     // flush pensing keyboard inputs
     uint8_t status, trash;

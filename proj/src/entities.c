@@ -3,23 +3,6 @@
 #include "v_card.h"
 
 
-// colors (24-bit, same format as game.c uses)
-
-#define COL_PEA     0x90EE90
-
-#define COL_ZOMBIE  0x444444
-
-#define COL_ZHEAD   0x90EE90
-
-#define COL_ZEYE    0xFF0000
-
-#define COL_FROZEN  0x0000FF
-
-#define COL_SUN     0xFFFF00
-
-#define COL_SUNCORE 0xFFA500
-
-
 // entity arrays
 
 zombie_t zombies[MAX_ZOMBIES];
@@ -378,11 +361,14 @@ void entities_render(int grid_x, int grid_y, int cell_w, int cell_h, bool frozen
     // projectiles
 
     for (int i = 0; i < MAX_PROJECTILES; i++) {
-
         if (!projectiles[i].active) continue;
 
-        vg_draw_rectangle(projectiles[i].x, projectiles[i].y - 4, 8, 8, COL_PEA);
-
+        if (peashooter_projectile_pixmap != NULL) {
+            // centrar sprite
+            int draw_x = projectiles[i].x - (peashooter_projectile_img.width / 2);
+            int draw_y = projectiles[i].y - (peashooter_projectile_img.height / 2);
+            vg_draw_xpm(peashooter_projectile_img, peashooter_projectile_pixmap, draw_x, draw_y);
+        }
     }
 
 
@@ -392,17 +378,13 @@ void entities_render(int grid_x, int grid_y, int cell_w, int cell_h, bool frozen
 
         if (!zombies[z].active) continue;
 
-        int zy = grid_y + zombies[z].lane * cell_h + 10;
+        int lane_top_y = grid_y + zombies[z].lane * cell_h;
 
-        uint32_t col = frozen ? COL_FROZEN : COL_ZOMBIE;
-
-        vg_draw_rectangle(zombies[z].x, zy, 25, 55, col);
-
-        vg_draw_rectangle(zombies[z].x + 3, zy - 15, 20, 18, COL_ZHEAD);
-
-        vg_draw_rectangle(zombies[z].x + 7, zy - 10, 4, 4, COL_ZEYE);
-
-        vg_draw_rectangle(zombies[z].x + 15, zy - 10, 4, 4, COL_ZEYE);
+        if (zombie_default_pixmap != NULL) {
+            int draw_y = lane_top_y + cell_h - zombie_default_img.height - 10;
+            
+            vg_draw_xpm(zombie_default_img, zombie_default_pixmap, zombies[z].x, draw_y);
+        }
 
     }
 

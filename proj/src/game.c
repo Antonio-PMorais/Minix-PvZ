@@ -11,6 +11,8 @@
 #include "sprites/sun.xpm"
 #include "sprites/peashooter.xpm"
 #include "sprites/grass_grid.xpm"
+#include "sprites/peashooter_projectile.xpm"
+#include "sprites/zombie_default.xpm"
 
 xpm_image_t sunflower_img;
 uint8_t *sunflower_pixmap = NULL;
@@ -23,6 +25,12 @@ uint8_t *peashooter_pixmap = NULL;
 
 xpm_image_t grass_grid_img;
 uint8_t *grass_grid_pixmap = NULL;
+
+xpm_image_t peashooter_projectile_img;
+uint8_t *peashooter_projectile_pixmap = NULL;
+
+xpm_image_t zombie_default_img;
+uint8_t *zombie_default_pixmap = NULL;
 
 // screen dimensions
 #define SCREEN_W 800
@@ -117,22 +125,32 @@ void game_init() {
     // load sprites pixelmaps
     sunflower_pixmap = xpm_load((xpm_map_t) sunflower_xpm, XPM_8_8_8_8, &sunflower_img);
     if (sunflower_pixmap == NULL) {
-        printf("Erro ao carregar o XPM do sunflower!\n");
+        printf("Error in loading sunflower xpm\n");
     }
 
     sun_pixmap = xpm_load((xpm_map_t) sun_xpm, XPM_8_8_8_8, &sun_img);
     if (sun_pixmap == NULL) {
-        printf("Erro ao carregar o XPM do sun!\n");
+        printf("Error in loading sun xpm.\n");
     }
 
     peashooter_pixmap = xpm_load((xpm_map_t) peashooter_xpm, XPM_8_8_8_8, &peashooter_img);
     if (peashooter_pixmap == NULL) {
-        printf("Erro ao carregar o XPM da peashooter!\n");
+        printf("Error in loading peashooter xpm.\n");
     }
 
     grass_grid_pixmap = xpm_load((xpm_map_t) grass_grid_xpm, XPM_8_8_8_8, &grass_grid_img);
     if (grass_grid_pixmap == NULL) {
-        printf("Erro ao carregar o XPM do grass_grid!\n");
+        printf("Error in loading background xpm.\n");
+    }
+
+    peashooter_projectile_pixmap = xpm_load((xpm_map_t) peashooter_projectile_xpm, XPM_8_8_8_8, &peashooter_projectile_img);
+    if (peashooter_projectile_pixmap == NULL) {
+        printf("Error on loading peashooter projectile xpm.\n");
+    }
+
+    zombie_default_pixmap = xpm_load((xpm_map_t) zombie_default_xpm, XPM_8_8_8_8, &zombie_default_img);
+    if (zombie_default_pixmap == NULL) {
+        printf("Error on loading zombie default xpm.\n");
     }
 
     rtc_read_date(&current_time);
