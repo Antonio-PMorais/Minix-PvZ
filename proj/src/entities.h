@@ -68,7 +68,7 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
                      int level, bool frozen, uint32_t timer_counter);
 
 // render
-void entities_render(int grid_x, int grid_y, int cell_h, bool frozen);
+void entities_render(int grid_x, int grid_y, int cell_w, int cell_h, bool frozen);
 
 // check if mouse clicked a sun, returns true if collected
 bool entities_collect_sun(int16_t mx, int16_t my, int *suns_count);

@@ -159,11 +159,12 @@ bool entities_collect_sun(int16_t mx, int16_t my, int *suns_count) {
 
 // grid constants must match game.c
 
-#define GRID_START_X 40
+#define GRID_START_X 0
 
 #define GRID_COLS    9
 
-#define CELL_SIZE    80
+#define CELL_W 89
+#define CELL_H 100
 
 
 bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
@@ -188,7 +189,7 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
                     // only shoot if zombie in lane
 
                     bool has_zombie = false;
-                    int plant_x = GRID_START_X + c * CELL_SIZE;
+                    int plant_x = GRID_START_X + c * CELL_W;
 
                     for (int z = 0; z < MAX_ZOMBIES; z++){
 
@@ -202,8 +203,8 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
                     if (has_zombie) {
 
                         grid[r][c].shoot_timer = 0;
-                        int px = plant_x + CELL_SIZE;
-                        int py = 150 + r * CELL_SIZE + CELL_SIZE / 2;
+                        int px = plant_x + CELL_W;
+                        int py = 85 + r * CELL_H + CELL_H / 2;
                         spawn_projectile(r, px, py);
 
                     }
@@ -220,9 +221,9 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 
                     grid[r][c].sun_timer = 0;
 
-                    int sx = GRID_START_X + c * CELL_SIZE + 20 + (rand() % 40);
+                    int sx = GRID_START_X + c * CELL_W + 20 + (rand() % 40);
 
-                    int sy = 150 + r * CELL_SIZE + 20 + (rand() % 40);
+                    int sy = 100 + r * CELL_H + 20 + (rand() % 40);
 
                     spawn_sun(sx, sy, sy);
 
@@ -299,14 +300,14 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
         if (frozen) continue;
 
 
-        int col = (zombies[z].x - GRID_START_X) / CELL_SIZE;
+        int col = (zombies[z].x - GRID_START_X) / CELL_W;
 
         int row = zombies[z].lane;
 
 
         if (col >= 0 && col < GRID_COLS && grid[row][col].type != 0 &&
 
-            zombies[z].x <= GRID_START_X + (col + 1) * CELL_SIZE) {
+            zombies[z].x <= GRID_START_X + (col + 1) * CELL_W + 55) {
 
             // eating plant
 
@@ -358,9 +359,11 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 
     if (tc % 300 == 0) {
 
-        int16_t sx = GRID_START_X + (rand() % (GRID_COLS * CELL_SIZE));
-        int16_t sy = 150 + (rand() % (5 * CELL_SIZE));
-        spawn_sun(sx, 0, sy);
+        int margin = 26;
+
+        int16_t sx = margin + (rand() % (800-2 * margin));
+        int16_t sy = 100 + margin + (rand() % (500 - 2 * margin));
+        spawn_sun(sx, margin, sy);
 
     }
 
@@ -370,7 +373,7 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 }
 
 
-void entities_render(int grid_x, int grid_y, int cell_h, bool frozen) {
+void entities_render(int grid_x, int grid_y, int cell_w, int cell_h, bool frozen) {
 
     // projectiles
 

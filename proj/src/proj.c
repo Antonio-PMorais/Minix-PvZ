@@ -86,11 +86,6 @@ int system_cleanup() {
         errors = 1;
     }
 
-    if (vg_exit() != 0) {
-        printf("Error: Failed to exit video mode.\n");
-        errors = 1;
-    }
-
     // flush pensing keyboard inputs
     uint8_t status, trash;
     while (1) {
