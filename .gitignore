@@ -4,6 +4,8 @@
 !*/
 !Makefile
 
+core.*
+
 *.d
 *.o
 output.txt

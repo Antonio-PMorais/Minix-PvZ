@@ -3,23 +3,6 @@
 #include "v_card.h"
 
 
-// colors (24-bit, same format as game.c uses)
-
-#define COL_PEA     0x90EE90
-
-#define COL_ZOMBIE  0x444444
-
-#define COL_ZHEAD   0x90EE90
-
-#define COL_ZEYE    0xFF0000
-
-#define COL_FROZEN  0x0000FF
-
-#define COL_SUN     0xFFFF00
-
-#define COL_SUNCORE 0xFFA500
-
-
 // entity arrays
 
 zombie_t zombies[MAX_ZOMBIES];
@@ -159,11 +142,12 @@ bool entities_collect_sun(int16_t mx, int16_t my, int *suns_count) {
 
 // grid constants must match game.c
 
-#define GRID_START_X 40
+#define GRID_START_X 0
 
 #define GRID_COLS    9
 
-#define CELL_SIZE    80
+#define CELL_W 89
+#define CELL_H 100
 
 
 bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
@@ -188,7 +172,7 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
                     // only shoot if zombie in lane
 
                     bool has_zombie = false;
-                    int plant_x = GRID_START_X + c * CELL_SIZE;
+                    int plant_x = GRID_START_X + c * CELL_W;
 
                     for (int z = 0; z < MAX_ZOMBIES; z++){
 
@@ -202,8 +186,8 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
                     if (has_zombie) {
 
                         grid[r][c].shoot_timer = 0;
-                        int px = plant_x + CELL_SIZE;
-                        int py = 150 + r * CELL_SIZE + CELL_SIZE / 2;
+                        int px = plant_x + CELL_W;
+                        int py = 85 + r * CELL_H + CELL_H / 2;
                         spawn_projectile(r, px, py);
 
                     }
@@ -220,9 +204,9 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 
                     grid[r][c].sun_timer = 0;
 
-                    int sx = GRID_START_X + c * CELL_SIZE + 20 + (rand() % 40);
+                    int sx = GRID_START_X + c * CELL_W + 20 + (rand() % 40);
 
-                    int sy = 150 + r * CELL_SIZE + 20 + (rand() % 40);
+                    int sy = 100 + r * CELL_H + 20 + (rand() % 40);
 
                     spawn_sun(sx, sy, sy);
 
@@ -299,14 +283,14 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
         if (frozen) continue;
 
 
-        int col = (zombies[z].x - GRID_START_X) / CELL_SIZE;
+        int col = (zombies[z].x - GRID_START_X) / CELL_W;
 
         int row = zombies[z].lane;
 
 
         if (col >= 0 && col < GRID_COLS && grid[row][col].type != 0 &&
 
-            zombies[z].x <= GRID_START_X + (col + 1) * CELL_SIZE) {
+            zombies[z].x <= GRID_START_X + (col + 1) * CELL_W + 55) {
 
             // eating plant
 
@@ -358,9 +342,11 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 
     if (tc % 300 == 0) {
 
-        int16_t sx = GRID_START_X + (rand() % (GRID_COLS * CELL_SIZE));
-        int16_t sy = 150 + (rand() % (5 * CELL_SIZE));
-        spawn_sun(sx, 0, sy);
+        int margin = 26;
+
+        int16_t sx = margin + (rand() % (800-2 * margin));
+        int16_t sy = 100 + margin + (rand() % (500 - 2 * margin));
+        spawn_sun(sx, margin, sy);
 
     }
 
@@ -370,16 +356,19 @@ bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
 }
 
 
-void entities_render(int grid_x, int grid_y, int cell_h, bool frozen) {
+void entities_render(int grid_x, int grid_y, int cell_w, int cell_h, bool frozen) {
 
     // projectiles
 
     for (int i = 0; i < MAX_PROJECTILES; i++) {
-
         if (!projectiles[i].active) continue;
 
-        vg_draw_rectangle(projectiles[i].x, projectiles[i].y - 4, 8, 8, COL_PEA);
-
+        if (peashooter_projectile_pixmap != NULL) {
+            // centrar sprite
+            int draw_x = projectiles[i].x - (peashooter_projectile_img.width / 2);
+            int draw_y = projectiles[i].y - (peashooter_projectile_img.height / 2);
+            vg_draw_xpm(peashooter_projectile_img, peashooter_projectile_pixmap, draw_x, draw_y);
+        }
     }
 
 
@@ -389,17 +378,13 @@ void entities_render(int grid_x, int grid_y, int cell_h, bool frozen) {
 
         if (!zombies[z].active) continue;
 
-        int zy = grid_y + zombies[z].lane * cell_h + 10;
+        int lane_top_y = grid_y + zombies[z].lane * cell_h;
 
-        uint32_t col = frozen ? COL_FROZEN : COL_ZOMBIE;
-
-        vg_draw_rectangle(zombies[z].x, zy, 25, 55, col);
-
-        vg_draw_rectangle(zombies[z].x + 3, zy - 15, 20, 18, COL_ZHEAD);
-
-        vg_draw_rectangle(zombies[z].x + 7, zy - 10, 4, 4, COL_ZEYE);
-
-        vg_draw_rectangle(zombies[z].x + 15, zy - 10, 4, 4, COL_ZEYE);
+        if (zombie_default_pixmap != NULL) {
+            int draw_y = lane_top_y + cell_h - zombie_default_img.height - 10;
+            
+            vg_draw_xpm(zombie_default_img, zombie_default_pixmap, zombies[z].x, draw_y);
+        }
 
     }
 
@@ -407,13 +392,16 @@ void entities_render(int grid_x, int grid_y, int cell_h, bool frozen) {
     // suns
 
     for (int i = 0; i < MAX_SUNS; i++) {
-
+        
         if (!suns_array[i].active) continue;
 
-        vg_draw_rectangle(suns_array[i].x - 12, suns_array[i].y - 12, 24, 24, COL_SUN);
-
-        vg_draw_rectangle(suns_array[i].x - 8, suns_array[i].y - 8, 16, 16, COL_SUNCORE);
-
+        if (sun_pixmap != NULL) {
+            // calcula o canto superior esquerdo para o sol ficar centrado
+            int draw_x = suns_array[i].x - (sun_img.width / 2);
+            int draw_y = suns_array[i].y - (sun_img.height / 2);
+            
+            vg_draw_xpm(sun_img, sun_pixmap, draw_x, draw_y);
+        }
     }
 
 }

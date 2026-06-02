@@ -1,0 +1,2418 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: proj
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+proj/
+  .vscode/
+    c_cpp_properties.json
+  levels/
+    level1.txt
+  src/
+    entities.c
+    entities.h
+    font.c
+    font.h
+    game.c
+    game.h
+    i8042.h
+    i8254.h
+    keyboard.c
+    keyboard.h
+    Makefile
+    menu.c
+    menu.h
+    mouse.c
+    mouse.h
+    proj.c
+    proj.h
+    rtc.c
+    rtc.h
+    timer.c
+    utils.c
+    v_card.c
+    v_card.h
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="proj/levels/level1.txt">
+15
+2,(1,1)(1,2),5
+1,(1,2),3
+</file>
+
+<file path="proj/.vscode/c_cpp_properties.json">
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}
+</file>
+
+<file path="proj/src/font.c">
+#include "font.h"
+#include "v_card.h"
+
+// 5x7 bitmap font — each char is 7 rows, 5 bits per row
+static const uint8_t font_data[128][7] = {
+    [0x20] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00}, // space
+    [0x2D] = {0x00,0x00,0x00,0x1F,0x00,0x00,0x00}, // -
+    [0x2F] = {0x01,0x01,0x02,0x04,0x08,0x10,0x10}, // /
+    [0x30] = {0x0E,0x11,0x13,0x15,0x19,0x11,0x0E}, // 0
+    [0x31] = {0x04,0x0C,0x04,0x04,0x04,0x04,0x0E}, // 1
+    [0x32] = {0x0E,0x11,0x01,0x02,0x04,0x08,0x1F}, // 2
+    [0x33] = {0x0E,0x11,0x01,0x06,0x01,0x11,0x0E}, // 3
+    [0x34] = {0x02,0x06,0x0A,0x12,0x1F,0x02,0x02}, // 4
+    [0x35] = {0x1F,0x10,0x1E,0x01,0x01,0x11,0x0E}, // 5
+    [0x36] = {0x06,0x08,0x10,0x1E,0x11,0x11,0x0E}, // 6
+    [0x37] = {0x1F,0x01,0x02,0x04,0x08,0x08,0x08}, // 7
+    [0x38] = {0x0E,0x11,0x11,0x0E,0x11,0x11,0x0E}, // 8
+    [0x39] = {0x0E,0x11,0x11,0x0F,0x01,0x02,0x0C}, // 9
+    [0x3A] = {0x00,0x04,0x04,0x00,0x04,0x04,0x00}, // :
+    [0x41] = {0x0E,0x11,0x11,0x1F,0x11,0x11,0x11}, // A
+    [0x42] = {0x1E,0x11,0x11,0x1E,0x11,0x11,0x1E}, // B
+    [0x43] = {0x0E,0x11,0x10,0x10,0x10,0x11,0x0E}, // C
+    [0x44] = {0x1E,0x11,0x11,0x11,0x11,0x11,0x1E}, // D
+    [0x45] = {0x1F,0x10,0x10,0x1E,0x10,0x10,0x1F}, // E
+    [0x46] = {0x1F,0x10,0x10,0x1E,0x10,0x10,0x10}, // F
+    [0x47] = {0x0E,0x11,0x10,0x17,0x11,0x11,0x0F}, // G
+    [0x48] = {0x11,0x11,0x11,0x1F,0x11,0x11,0x11}, // H
+    [0x49] = {0x0E,0x04,0x04,0x04,0x04,0x04,0x0E}, // I
+    [0x4A] = {0x01,0x01,0x01,0x01,0x01,0x11,0x0E}, // J
+    [0x4B] = {0x11,0x12,0x14,0x18,0x14,0x12,0x11}, // K
+    [0x4C] = {0x10,0x10,0x10,0x10,0x10,0x10,0x1F}, // L
+    [0x4D] = {0x11,0x1B,0x15,0x15,0x11,0x11,0x11}, // M
+    [0x4E] = {0x11,0x19,0x15,0x13,0x11,0x11,0x11}, // N
+    [0x4F] = {0x0E,0x11,0x11,0x11,0x11,0x11,0x0E}, // O
+    [0x50] = {0x1E,0x11,0x11,0x1E,0x10,0x10,0x10}, // P
+    [0x51] = {0x0E,0x11,0x11,0x11,0x15,0x12,0x0D}, // Q
+    [0x52] = {0x1E,0x11,0x11,0x1E,0x14,0x12,0x11}, // R
+    [0x53] = {0x0E,0x11,0x10,0x0E,0x01,0x11,0x0E}, // S
+    [0x54] = {0x1F,0x04,0x04,0x04,0x04,0x04,0x04}, // T
+    [0x55] = {0x11,0x11,0x11,0x11,0x11,0x11,0x0E}, // U
+    [0x56] = {0x11,0x11,0x11,0x11,0x0A,0x0A,0x04}, // V
+    [0x57] = {0x11,0x11,0x11,0x15,0x15,0x1B,0x11}, // W
+    [0x58] = {0x11,0x11,0x0A,0x04,0x0A,0x11,0x11}, // X
+    [0x59] = {0x11,0x11,0x0A,0x04,0x04,0x04,0x04}, // Y
+    [0x5A] = {0x1F,0x01,0x02,0x04,0x08,0x10,0x1F}, // Z
+};
+
+#define CHAR_W 5
+#define CHAR_H 7
+#define SCALE  2
+#define SPACING 2
+
+void font_draw_char(char c, int x, int y, uint32_t color) {
+    uint8_t idx = (uint8_t) c;
+    if (idx >= 128) return;
+    const uint8_t *bmp = font_data[idx];
+    for (int row = 0; row < CHAR_H; row++) {
+        uint8_t bits = bmp[row];
+        for (int col = 0; col < CHAR_W; col++) {
+            if (bits & (1 << (CHAR_W - 1 - col))) {
+                vg_draw_rectangle(x + col * SCALE, y + row * SCALE, SCALE, SCALE, color);
+            }
+        }
+    }
+}
+
+void font_draw_string(const char *str, int x, int y, uint32_t color) {
+    int cx = x;
+    while (*str) {
+        font_draw_char(*str, cx, y, color);
+        cx += CHAR_W * SCALE + SPACING;
+        str++;
+    }
+}
+
+void font_draw_number(int num, int x, int y, uint32_t color) {
+    if (num < 0) {
+        font_draw_char('-', x, y, color);
+        x += CHAR_W * SCALE + SPACING;
+        num = -num;
+    }
+    if (num == 0) { font_draw_char('0', x, y, color); return; }
+    char buf[12];
+    int len = 0;
+    int tmp = num;
+    while (tmp > 0) { buf[len++] = '0' + (tmp % 10); tmp /= 10; }
+    for (int i = len - 1; i >= 0; i--) {
+        font_draw_char(buf[i], x, y, color);
+        x += CHAR_W * SCALE + SPACING;
+    }
+}
+</file>
+
+<file path="proj/src/font.h">
+#ifndef __FONT_H
+#define __FONT_H
+
+#include <stdint.h>
+
+// draw a single character at (x,y) with given color
+void font_draw_char(char c, int x, int y, uint32_t color);
+
+// draw a null terminated string at (x,y)
+void font_draw_string(const char *str, int x, int y, uint32_t color);
+
+// draw an integer number at (x,y)
+void font_draw_number(int num, int x, int y, uint32_t color);
+
+#endif
+</file>
+
+<file path="proj/src/i8042.h">
+#ifndef _I8042_H_
+#define _I8042_H_
+
+#include <lcom/lcf.h>
+
+#define KBC_IRQ           1
+#define MOUSE_IRQ         12
+
+#define DELAY_US          20000
+
+#define KBC_STATUS_REG    0x64
+#define KBC_CMD_REG       0x64
+#define KBC_OUT_BUF       0x60
+
+#define KBC_OBF           BIT(0)
+#define KBC_IBF           BIT(1)
+#define KBC_PAR_ERR       BIT(7)
+#define KBC_TO_ERR        BIT(6)
+#define KBC_AUX           BIT(5)
+
+#define KBC_READ_CMD      0x20
+#define KBC_WRITE_CMD     0x60
+#define KBC_INT_KBD       BIT(0)
+
+#define ESC_BREAKCODE     0x81
+#define TWO_BYTE_CODE     0xE0
+#define MAKECODE_BIT      BIT(7)
+
+#endif /* _I8042_H_ */
+</file>
+
+<file path="proj/src/i8254.h">
+#ifndef _LCOM_I8254_H_
+#define _LCOM_I8254_H_
+
+#include <lcom/lcf.h>
+
+/** @defgroup i8254 i8254
+ * @{
+ *
+ * Constants for programming the i8254 Timer. Needs to be completed.
+ */
+
+#define TIMER_FREQ 1193182 /**< @brief clock frequency for timer in PC and AT */
+#define TIMER0_IRQ 0 /**< @brief Timer 0 IRQ line */
+
+/* I/O port addresses */
+
+#define TIMER_0    0x40 /**< @brief Timer 0 count register */
+#define TIMER_1    0x41 /**< @brief Timer 1 count register */
+#define TIMER_2    0x42 /**< @brief Timer 2 count register */
+#define TIMER_CTRL 0x43 /**< @brief Control register */
+
+#define SPEAKER_CTRL 0x61 /**< @brief Register for speaker control  */
+
+/* Timer control */
+
+/* Timer selection: bits 7 and 6 */
+
+#define TIMER_SEL0   0x00              /**< @brief Control Word for Timer 0 */
+#define TIMER_SEL1   BIT(6)            /**< @brief Control Word for Timer 1 */
+#define TIMER_SEL2   BIT(7)            /**< @brief Control Word for Timer 2 */
+#define TIMER_RB_CMD (BIT(7) | BIT(6)) /**< @brief Read Back Command */
+
+/* Register selection: bits 5 and 4 */
+
+#define TIMER_LSB     BIT(4)                  /**< @brief Initialize Counter LSB only */
+#define TIMER_MSB     BIT(5)                  /**< @brief Initialize Counter MSB only */
+#define TIMER_LSB_MSB (TIMER_LSB | TIMER_MSB) /**< @brief Initialize LSB first and MSB afterwards */
+
+/* Operating mode: bits 3, 2 and 1 */
+
+#define TIMER_SQR_WAVE (BIT(2) | BIT(1)) /**< @brief Mode 3: square wave generator */
+#define TIMER_RATE_GEN BIT(2)            /**< @brief Mode 2: rate generator */
+
+/* Counting mode: bit 0 */
+
+#define TIMER_BCD 0x01 /**< @brief Count in BCD */
+#define TIMER_BIN 0x00 /**< @brief Count in binary */
+
+/* READ-BACK COMMAND FORMAT */
+
+#define TIMER_RB_COUNT_  BIT(5)
+#define TIMER_RB_STATUS_ BIT(4)
+#define TIMER_RB_SEL(n)  BIT((n) + 1)
+
+/**@}*/
+
+#endif /* _LCOM_I8254_H */
+</file>
+
+<file path="proj/src/keyboard.c">
+#include <lcom/lcf.h>
+#include "keyboard.h"
+#include "i8042.h"
+
+static int kbd_hook_id = 1; 
+static uint8_t scancode = 0;
+static bool kbc_error = false; 
+
+int (kbd_subscribe_int)(uint8_t *bit_no) {
+  if (bit_no == NULL) return 1;
+  *bit_no = kbd_hook_id;
+
+  return sys_irqsetpolicy(KBC_IRQ, IRQ_REENABLE | IRQ_EXCLUSIVE, &kbd_hook_id);
+}
+
+int (kbd_unsubscribe_int)() {
+  return sys_irqrmpolicy(&kbd_hook_id);
+}
+
+void (kbc_ih)() {
+  uint8_t status;
+  kbc_error = false;
+
+  if (util_sys_inb(KBC_STATUS_REG, &status) != 0) {
+    kbc_error = true;
+    return;
+  }
+
+  if (status & KBC_OBF) {
+    
+    if (util_sys_inb(KBC_OUT_BUF, &scancode) != 0) {
+      kbc_error = true;
+      return;
+    }
+
+    if ((status & KBC_PAR_ERR) || (status & KBC_TO_ERR)) {
+      kbc_error = true; 
+    }
+  } else {
+    kbc_error = true;
+  }
+}
+
+int (kbc_restore_interrupts)() {
+    uint8_t command_byte;
+
+    if (sys_outb(KBC_CMD_REG, KBC_READ_CMD) != 0) return 1;
+
+    if (util_sys_inb(KBC_OUT_BUF, &command_byte) != 0) return 1;
+
+    command_byte |= KBC_INT_KBD;
+
+    if (sys_outb(KBC_CMD_REG, KBC_WRITE_CMD) != 0) return 1;
+
+    if (sys_outb(KBC_OUT_BUF, command_byte) != 0) return 1;
+
+    return 0;
+}
+
+uint8_t (kbd_get_scancode)() {
+  return scancode;
+}
+
+bool (kbd_has_error)() {
+  return kbc_error;
+}
+</file>
+
+<file path="proj/src/keyboard.h">
+#ifndef __KBC_H
+#define __KBC_H
+
+#include <stdint.h>
+#include <stdbool.h>
+
+int (kbd_subscribe_int)(uint8_t *bit_no);
+int (kbd_unsubscribe_int)();
+void (kbc_ih)();
+
+uint8_t (kbd_get_scancode)();
+bool (kbd_has_error)();
+
+int (kbc_restore_interrupts)();
+
+#endif
+</file>
+
+<file path="proj/src/menu.h">
+#ifndef __MENU_H
+#define __MENU_H
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <lcom/lcf.h>
+
+void menu_init();
+void menu_render(int mouse_x, int mouse_y);
+void menu_on_mouse(struct packet *pp, int mouse_x, int mouse_y);
+void menu_on_key(uint8_t scancode);
+
+#endif
+</file>
+
+<file path="proj/src/mouse.c">
+#include <lcom/lcf.h>
+#include "mouse.h"
+#include "i8042.h"
+
+
+static int mouse_hook_id = 12; 
+uint8_t mouse_byte;
+bool mouse_error = false;
+
+int (mouse_subscribe_int)(uint8_t *bit_no) {
+  if (bit_no == NULL) return 1;
+  *bit_no = mouse_hook_id;
+  
+  if (sys_irqsetpolicy(MOUSE_IRQ, IRQ_REENABLE | IRQ_EXCLUSIVE, &mouse_hook_id) != 0) {
+    return 1;
+  }
+  return 0;
+}
+
+int (mouse_unsubscribe_int)() {
+  if (sys_irqrmpolicy(&mouse_hook_id) != 0) {
+    return 1;
+  }
+  return 0;
+}
+
+void (mouse_ih)() {
+  uint8_t status;
+  mouse_error = true;
+  
+  if (util_sys_inb(KBC_STATUS_REG, &status) != 0) return;
+  
+  if ((status & KBC_OBF) && (status & KBC_AUX)) { 
+    if (util_sys_inb(0x60, &mouse_byte) != 0) return;
+    
+    if ((status & (KBC_PAR_ERR | KBC_TO_ERR)) == 0) { 
+      mouse_error = false;
+    }
+  }
+}
+
+int mouse_write_cmd(uint8_t cmd) {
+  uint8_t status, ack;
+  uint8_t max_attempts = 10;
+  
+  while (max_attempts > 0) {
+    if (util_sys_inb(0x64, &status) != 0) return 1;
+    
+    if ((status & KBC_IBF) == 0) { 
+      if (sys_outb(0x64, 0xD4) != 0) return 1; 
+    }
+    
+    if (util_sys_inb(0x64, &status) != 0) return 1;
+    if ((status & KBC_IBF) == 0) {
+      if (sys_outb(0x60, cmd) != 0) return 1; 
+      if (util_sys_inb(0x60, &ack) != 0) return 1; 
+      if (ack == 0xFA) return 0; 
+    }
+    max_attempts--;
+    tickdelay(micros_to_ticks(20000));
+  }
+  return 1;
+}
+
+void mouse_parse_packet(struct packet *pp, uint8_t bytes[]) {
+  for (int i = 0; i < 3; i++) {
+    pp->bytes[i] = bytes[i];
+  }
+  pp->lb = bytes[0] & BIT(0);
+  pp->rb = bytes[0] & BIT(1);
+  pp->mb = bytes[0] & BIT(2);
+  pp->delta_x = (bytes[0] & BIT(4)) ? (0xFF00 | bytes[1]) : bytes[1];
+  pp->delta_y = (bytes[0] & BIT(5)) ? (0xFF00 | bytes[2]) : bytes[2];
+  pp->x_ov = bytes[0] & BIT(6);
+  pp->y_ov = bytes[0] & BIT(7);
+}
+
+
+int (mouse_enable_data_report)() {
+  return mouse_write_cmd(0xF4);
+}
+
+int (mouse_disable_data_report)() {
+  return mouse_write_cmd(0xF5);
+}
+</file>
+
+<file path="proj/src/mouse.h">
+#ifndef __MOUSE_H
+#define __MOUSE_H
+
+#include <lcom/lcf.h>
+
+int (mouse_subscribe_int)(uint8_t *bit_no);
+int (mouse_unsubscribe_int)();
+void (mouse_ih)();
+int mouse_write_cmd(uint8_t cmd);
+void mouse_parse_packet(struct packet *pp, uint8_t bytes[]);
+
+int (mouse_enable_data_report)();
+int (mouse_disable_data_report)();
+
+#endif /* __MOUSE_H */
+</file>
+
+<file path="proj/src/timer.c">
+#include <lcom/lcf.h>
+#include <lcom/timer.h>
+
+#include <stdint.h>
+
+#include "i8254.h"
+
+int timer_hook_id = 0;
+uint32_t timer_counter = 0;
+
+int (timer_set_frequency)(uint8_t timer, uint32_t freq) {
+  if (timer > 2) return 1;
+  if (freq < 19 || freq > TIMER_FREQ) return 1;
+
+  uint8_t st;
+  if (timer_get_conf(timer, &st) != 0) return 1;
+
+  st &= 0x0F;
+
+  uint8_t ctrl_word = (timer << 6) | TIMER_LSB_MSB | st;
+
+  uint16_t div = TIMER_FREQ / freq;
+  uint8_t lsb, msb;
+  util_get_LSB(div, &lsb);
+  util_get_MSB(div, &msb);
+
+  if (sys_outb(TIMER_CTRL, ctrl_word) != 0) return 1;
+  if (sys_outb(TIMER_0 + timer, lsb) != 0) return 1;
+  if (sys_outb(TIMER_0 + timer, msb) != 0) return 1;
+
+  return 0;
+}
+
+int (timer_subscribe_int)(uint8_t *bit_no) {
+  if (bit_no == NULL) return 1;
+  *bit_no = timer_hook_id;
+  
+  return sys_irqsetpolicy(TIMER0_IRQ, IRQ_REENABLE, &timer_hook_id);
+}
+
+int (timer_unsubscribe_int)() {
+  return sys_irqrmpolicy(&timer_hook_id);
+}
+
+void (timer_int_handler)() {
+  timer_counter++;
+}
+
+int (timer_get_conf)(uint8_t timer, uint8_t *st) {
+  if (timer > 2 || st == NULL) return 1;
+
+  uint8_t read_back_cmd = TIMER_RB_CMD | TIMER_RB_COUNT_ | TIMER_RB_SEL(timer);
+
+  if (sys_outb(TIMER_CTRL, read_back_cmd) != 0) return 1;
+
+  return util_sys_inb(TIMER_0 + timer, st);
+}
+
+int (timer_display_conf)(uint8_t timer, uint8_t st, enum timer_status_field field) {
+  union timer_status_field_val val;
+
+  switch (field) {
+    case tsf_all:
+      val.byte = st;
+      break;
+    case tsf_initial:
+      val.in_mode = (st & TIMER_LSB_MSB) >> 4;
+      break;
+    case tsf_mode:
+      val.count_mode = (st & (BIT(3) | BIT(2) | BIT(1))) >> 1;
+      if (val.count_mode == 6 || val.count_mode == 7) {
+        val.count_mode &= 0x03; 
+      }
+      break;
+    case tsf_base:
+      val.bcd = (st & TIMER_BCD);
+      break;
+    default:
+      return 1;
+  }
+
+  return timer_print_config(timer, field, val);
+}
+</file>
+
+<file path="proj/src/utils.c">
+#include <lcom/lcf.h>
+#include <stdint.h>
+
+int(util_get_LSB)(uint16_t val, uint8_t *lsb) {
+  if (lsb == NULL) return 1;
+  *lsb = (uint8_t)(val & 0xFF); 
+  return 0;
+}
+
+int(util_get_MSB)(uint16_t val, uint8_t *msb) {
+  if (msb == NULL) return 1;
+  *msb = (uint8_t)(val >> 8);
+  return 0;
+}
+
+int (util_sys_inb)(int port, uint8_t *value) {
+  if (value == NULL) return 1;
+  
+  uint32_t temp_val;
+  if (sys_inb(port, &temp_val) != 0) {
+    return 1;
+  }
+  
+  *value = (uint8_t)(temp_val & 0xFF);
+  return 0;
+}
+</file>
+
+<file path="proj/src/entities.h">
+#ifndef __ENTITIES_H
+#define __ENTITIES_H
+
+#include <stdint.h>
+#include <stdbool.h>
+
+// max counts
+#define MAX_ZOMBIES      20
+#define MAX_PROJECTILES  30
+#define MAX_SUNS         10
+
+// zombie
+typedef struct {
+    bool active;
+    int16_t x;
+    uint8_t lane;       // row 0-4
+    int16_t hp;
+    int16_t speed;
+    bool eating;
+    uint16_t eat_timer;
+} zombie_t;
+
+// projectile (pea)
+typedef struct {
+    bool active;
+    int16_t x, y;
+    uint8_t lane;
+    int16_t damage;
+} projectile_t;
+
+// falling sun
+typedef struct {
+    bool active;
+    int16_t x, y;
+    int16_t target_y;
+    uint16_t lifetime;
+} sun_t;
+
+// plant data per cell
+typedef struct {
+    int type;           // 0=none, 1=sunflower, 2=peashooter
+    int16_t hp;
+    uint16_t shoot_timer;
+    uint16_t sun_timer;
+} plant_cell_t;
+
+// global entity arrays — defined in entities.c
+extern zombie_t zombies[MAX_ZOMBIES];
+extern projectile_t projectiles[MAX_PROJECTILES];
+extern sun_t suns_array[MAX_SUNS];
+
+void entities_init();
+
+// spawn
+void spawn_zombie(uint8_t lane, int level);
+void spawn_projectile(uint8_t lane, int16_t x, int16_t y);
+void spawn_sun(int16_t x, int16_t start_y, int16_t target_y);
+
+// update — returns true if game over (zombie reached left edge)
+bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
+                     int level, bool frozen, uint32_t timer_counter);
+
+// render
+void entities_render(int grid_x, int grid_y, int cell_h, bool frozen);
+
+// check if mouse clicked a sun, returns true if collected
+bool entities_collect_sun(int16_t mx, int16_t my, int *suns_count);
+
+// count active zombies
+int entities_zombies_alive();
+
+#endif
+</file>
+
+<file path="proj/src/menu.c">
+#include "menu.h"
+#include "v_card.h"
+#include "game.h"
+#include "font.h"
+
+//button coordinates
+#define BTN_W 200
+#define BTN_H 60
+#define BTN_PLAY_X 300
+#define BTN_PLAY_Y 160
+#define BTN_LEVELS_X 300
+#define BTN_LEVELS_Y 250
+#define BTN_EXIT_X 300
+#define BTN_EXIT_Y 340
+
+static bool prev_lb = false;
+
+void menu_init() {
+    prev_lb = false;
+}
+
+void menu_render(int mouse_x, int mouse_y) {
+    vg_clear(0x111111);
+
+    uint32_t play_color = 0x005500;
+    uint32_t levels_color = 0x555500;
+    uint32_t exit_color = 0x550000;
+
+    // detect hover
+    if (mouse_x >= BTN_PLAY_X && mouse_x <= BTN_PLAY_X + BTN_W && 
+        mouse_y >= BTN_PLAY_Y && mouse_y <= BTN_PLAY_Y + BTN_H) {
+        play_color = 0x00FF00;
+    }
+
+    if (mouse_x >= BTN_LEVELS_X && mouse_x <= BTN_LEVELS_X + BTN_W && 
+        mouse_y >= BTN_LEVELS_Y && mouse_y <= BTN_LEVELS_Y + BTN_H) {
+        levels_color = 0xFFFF00;
+    }
+
+    if (mouse_x >= BTN_EXIT_X && mouse_x <= BTN_EXIT_X + BTN_W && 
+        mouse_y >= BTN_EXIT_Y && mouse_y <= BTN_EXIT_Y + BTN_H) {
+        exit_color = 0xFF0000;
+    }
+
+    // draw buttons
+    vg_draw_rectangle(BTN_PLAY_X, BTN_PLAY_Y, BTN_W, BTN_H, play_color);
+    vg_draw_rectangle(BTN_LEVELS_X, BTN_LEVELS_Y, BTN_W, BTN_H, levels_color);
+    vg_draw_rectangle(BTN_EXIT_X, BTN_EXIT_Y, BTN_W, BTN_H, exit_color);
+
+    font_draw_string("PLAY", BTN_PLAY_X + 76, BTN_PLAY_Y + 23, 0xFFFFFF);
+    font_draw_string("LEVELS", BTN_LEVELS_X + 64, BTN_LEVELS_Y + 23, 0xFFFFFF);
+    font_draw_string("EXIT", BTN_EXIT_X + 76, BTN_EXIT_Y + 23, 0xFFFFFF);
+}
+
+void menu_on_mouse(struct packet *pp, int mouse_x, int mouse_y) {
+    // handle click
+    if (pp->lb && !prev_lb) {
+        
+        if (mouse_x >= BTN_PLAY_X && mouse_x <= BTN_PLAY_X + BTN_W && 
+            mouse_y >= BTN_PLAY_Y && mouse_y <= BTN_PLAY_Y + BTN_H) {
+
+            game_init_level(1);
+            game_change_state(PLAYING);
+        }
+
+        if (mouse_x >= BTN_LEVELS_X && mouse_x <= BTN_LEVELS_X + BTN_W && 
+            mouse_y >= BTN_LEVELS_Y && mouse_y <= BTN_LEVELS_Y + BTN_H) {
+            game_change_state(LEVEL_SELECT);
+        }
+
+        if (mouse_x >= BTN_EXIT_X && mouse_x <= BTN_EXIT_X + BTN_W && 
+            mouse_y >= BTN_EXIT_Y && mouse_y <= BTN_EXIT_Y + BTN_H) {
+            game_set_quit();
+        }
+    }
+    prev_lb = pp->lb;
+}
+
+void menu_on_key(uint8_t scancode) {
+    // press esc
+    if (scancode == 0x81) {
+        game_set_quit();
+    }
+}
+</file>
+
+<file path="proj/src/proj.h">
+#ifndef _PROJ_H_
+#define _PROJ_H_
+
+#include <stdint.h>
+
+#define VIDEO_MODE 0x115 
+#define FPS 60
+
+extern uint8_t timer_bit_no;
+extern uint8_t kbd_bit_no;
+extern uint8_t mouse_bit_no;
+extern uint8_t rtc_bit_no;
+extern uint32_t timer_counter;
+extern uint8_t mouse_byte;
+extern bool mouse_error;
+
+int system_init();
+int system_cleanup();
+
+#endif
+</file>
+
+<file path="proj/src/rtc.c">
+#include "rtc.h"
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+#include <minix/syslib.h>
+#include <minix/sysutil.h>
+
+#define RTC_ADDR_REG 0x70
+#define RTC_DATA_REG 0x71
+
+#define RTC_REG_A     0x0A
+#define RTC_REG_B     0x0B
+#define RTC_REG_SEC   0x00
+#define RTC_REG_MIN   0x02
+#define RTC_REG_HOUR  0x04
+#define RTC_REG_DAY   0x07
+#define RTC_REG_MONTH 0x08
+#define RTC_REG_YEAR  0x09
+
+#define RTC_UIP_MSK (1 << 7)
+#define RTC_DM_MSK  (1 << 2)
+
+static int rtc_hook_id = 8;
+
+static int bdc_to_bin(uint8_t bcd) {
+  uint8_t first_digit, second_digit;
+  first_digit = (bcd & 0xF0)>>4;
+  second_digit = (bcd & 0x0F);
+  return first_digit * 10 + second_digit;
+}
+
+int rtc_read_date(rtc_date *date) {
+  uint32_t value;
+
+  // Wait for the UIP bit to be 0
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_A) != 0) {return 1;}
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+
+  while (value & RTC_UIP_MSK) {
+    if (sys_outb(RTC_ADDR_REG, RTC_REG_A) != 0) {return 1;}
+    if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  }
+
+  // Check for BCD format
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_B) != 0) {return 1;}
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  bool is_bcd_format = !(value & RTC_DM_MSK);
+
+  // Read the seconds
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_SEC) != 0) {return 1;}
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  uint8_t seconds = (uint8_t) value;
+  if (is_bcd_format) {seconds = bdc_to_bin(seconds);}
+  date->seconds = seconds;
+
+  // Read the minutes
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_MIN) != 0) {return 1;}
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  uint8_t minutes = (uint8_t) value;
+  if (is_bcd_format) {minutes = bdc_to_bin(minutes);}
+  date->minutes = minutes;
+
+  // Read the hours
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_HOUR) != 0) {return 1;}
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  uint8_t hours = (uint8_t) value;
+  if (is_bcd_format) {hours = bdc_to_bin(hours);}
+  date->hours = hours;
+
+  // Read the day
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_DAY) != 0) {return 1;}
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  uint8_t day = (uint8_t) value;
+  if (is_bcd_format) {day = bdc_to_bin(day);}
+  date->day = day;
+
+  // Read the month
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_MONTH) != 0) {return 1;}
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  uint8_t month = (uint8_t) value;
+  if (is_bcd_format) {month = bdc_to_bin(month);}
+  date->month = month;
+
+  // Read the year
+  if (sys_outb(RTC_ADDR_REG, RTC_REG_YEAR) != 0) {return 1;}
+  if (sys_inb(RTC_DATA_REG, &value) != 0) {return 1;}
+  uint8_t year = (uint8_t) value;
+  if (is_bcd_format) {year = bdc_to_bin(year);}
+  date->year = year;
+
+  return 0;
+}
+
+
+int (rtc_subscribe_int)(uint8_t *bit_no) {
+  if (bit_no == NULL) return 1;
+  *bit_no = rtc_hook_id;
+  return sys_irqsetpolicy(8, IRQ_REENABLE, &rtc_hook_id);
+}
+
+int rtc_unsubscribe_int(void) {
+  return sys_irqrmpolicy(&rtc_hook_id);
+}
+</file>
+
+<file path="proj/src/rtc.h">
+#pragma once
+
+
+
+#include <stdint.h>
+
+typedef struct {
+  uint8_t day;
+  uint8_t month;
+  uint8_t year;
+  uint8_t hours;
+  uint8_t minutes;
+  uint8_t seconds;
+} rtc_date;
+
+/**
+ * Reads the current date from the RTC and fills the provided `rtc_date`
+ * structure. Returns 0 on success, non-zero on failure.
+ *
+ * This function takes care of ensuring data consistency by checking the Update
+ * In Progress (UIP) flag before each read. It also should check the RTC
+ * configuration and perform data conversions if necessary (e.g. BCD to binary).
+ */
+int rtc_read_date(rtc_date *date);
+
+int (rtc_subscribe_int)(uint8_t *bit_no);
+int (rtc_unsubscribe_int)();
+</file>
+
+<file path="proj/src/v_card.c">
+#include "v_card.h"
+
+static void *video_mem;       // Process (virtual) address to which VRAM is mapped
+static uint8_t *back_buffer;  // Back buffer in RAM
+static vbe_mode_info_t vmi_p; // VBE mode info
+static unsigned int vram_size;         // Total VRAM size in bytes
+static unsigned int bytes_per_pixel;   // Cached for use in all draw calls
+
+
+int(change_mode)(uint16_t mode) {
+    reg86_t reg86;
+
+    memset(&reg86, 0, sizeof(reg86)); //clean struct values
+
+    reg86.intno = 0x10;          //video interrupt
+    reg86.ax = 0x4F02;           //set VBE mode
+    
+    reg86.bx = (mode | BIT(14)) & ~BIT(15); //ensure linear frame buffer && avoid cleaning screen between mode changes
+
+    if (sys_int86(&reg86) != OK) {   //send instruction
+        printf("\tvg_init(): sys_int86() failed \n");
+        return 1;
+    }
+
+    return 0;
+}
+
+void *(vg_init)(uint16_t mode) {
+    //get vbe mode information
+    if (vbe_get_mode_info(mode, &vmi_p) != 0) {
+        printf("vbe_get_mode_info failed\n");
+        return NULL;
+    }
+
+    //map physical memory to virtual memory
+    int r;
+    struct minix_mem_range mr;
+    unsigned int vram_base = vmi_p.PhysBasePtr;
+    bytes_per_pixel = (vmi_p.BitsPerPixel + 7) / 8;
+    vram_size = vmi_p.XResolution * vmi_p.YResolution * bytes_per_pixel;
+
+    //allow memory mapping
+    mr.mr_base = (phys_bytes) vram_base;
+    mr.mr_limit = mr.mr_base + vram_size;
+
+    if (OK != (r = sys_privctl(SELF, SYS_PRIV_ADD_MEM, &mr))) {
+        panic("sys_privctl (ADD_MEM) failed: %d\n", r);
+    }
+
+    //map memory
+    video_mem = vm_map_phys(SELF, (void *)mr.mr_base, vram_size);
+    if (video_mem == MAP_FAILED) {
+        panic("couldn't map video memory");
+    }
+
+    // Allocate the back buffer in regular RAM
+    back_buffer = (uint8_t *) malloc(vram_size);
+    if (back_buffer == NULL) {
+        printf("vg_init: failed to allocate back buffer\n");
+        return NULL;
+    }
+    memset(back_buffer, 0, vram_size);
+
+    //change vbe mode
+    if (change_mode(mode) != 0) {
+        free(back_buffer);
+        back_buffer = NULL;
+        return NULL;
+    }
+
+    return video_mem;
+}
+
+// int (vg_exit)() {
+//     if (back_buffer != NULL) {
+//         free(back_buffer);
+//         back_buffer = NULL;
+//     }
+//     return 0;
+// }
+
+// Copy the back buffer to VRAM — call once at the end of every frame
+void (vg_flip)() {
+    memcpy(video_mem, back_buffer, vram_size);
+}
+
+// Clear the back buffer to a given color (typically 0x000000)
+void (vg_clear)(uint32_t color) {
+    if (bytes_per_pixel == 1) {
+        memset(back_buffer, (uint8_t)color, vram_size);
+    } else {
+        // Fill pixel by pixel
+        unsigned int num_pixels = vmi_p.XResolution * vmi_p.YResolution;
+        for (unsigned int i = 0; i < num_pixels; i++) {
+            memcpy(back_buffer + i * bytes_per_pixel, &color, bytes_per_pixel);
+        }
+    }
+}
+
+int (vg_draw_pixel)(uint16_t x, uint16_t y, uint32_t color) {
+    //check out of bounds
+    if (x >= vmi_p.XResolution || y >= vmi_p.YResolution) {
+        return 0; 
+    }
+
+    unsigned int index = (vmi_p.XResolution * y + x) * bytes_per_pixel;
+
+    //moving the exact number of bytes needed
+    memcpy(back_buffer + index, &color, bytes_per_pixel);
+
+    return 0;
+}
+
+int (vg_draw_hline)(uint16_t x, uint16_t y, uint16_t len, uint32_t color) {
+        // Clamp length to screen width
+    if (x >= vmi_p.XResolution || y >= vmi_p.YResolution) return 0;
+    if (x + len > vmi_p.XResolution) len = vmi_p.XResolution - x;
+
+    unsigned int index = (vmi_p.XResolution * y + x) * bytes_per_pixel;
+
+    for (uint16_t i = 0; i < len; i++) {
+        memcpy(back_buffer + index + i * bytes_per_pixel, &color, bytes_per_pixel); // Write the whole line in one pass: faster than calling vg_draw_pixel per pixel
+    }
+    return 0;
+}
+
+int (vg_draw_rectangle)(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color) {
+    if (x >= vmi_p.XResolution || y >= vmi_p.YResolution) return 0;
+    if (y + height > vmi_p.YResolution) height = vmi_p.YResolution - y;
+
+    for (uint16_t i = 0; i < height; i++) {
+        vg_draw_hline(x, y + i, width, color);
+    }
+    return 0;
+}
+
+int (vg_draw_xpm)(xpm_image_t img, uint8_t *pixmap, uint16_t x, uint16_t y) {
+    for (int i = 0; i < img.height; i++) {
+        for (int j = 0; j < img.width; j++) {
+            // For XPM_INDEXED mode, each pixel in the array represents a 1-byte color index
+            if (vg_draw_pixel(x + j, y + i, pixmap[i * img.width + j]) != 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+</file>
+
+<file path="proj/src/v_card.h">
+#ifndef __V_CARD_H
+#define __V_CARD_H
+
+#include <lcom/lcf.h>
+
+int(change_mode)(uint16_t mode);
+void *(vg_init)(uint16_t mode);
+//int  (vg_exit)();
+
+// Call once at the end of each frame to push the back buffer to the screen
+void (vg_flip)();
+
+// Fill the entire back buffer with a color before drawing the next frame
+void (vg_clear)(uint32_t color);
+
+int (vg_draw_pixel)(uint16_t x, uint16_t y, uint32_t color);
+int (vg_draw_hline)(uint16_t x, uint16_t y, uint16_t len, uint32_t color);
+int (vg_draw_rectangle)(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint32_t color);
+
+int (vg_draw_xpm)(xpm_image_t img, uint8_t *pixmap, uint16_t x, uint16_t y);
+
+#endif /* __V_CARD_H */
+</file>
+
+<file path="proj/src/game.h">
+#ifndef __GAME_H
+#define __GAME_H
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <lcom/lcf.h>
+
+typedef enum {
+    MAIN_MENU,
+    PLAYING,
+    LEVEL_COMPLETE,
+    LEVEL_SELECT
+} GameState;
+
+#define MAX_WAVES 50
+#define MAX_ZOMBIES_PER_WAVE 50
+
+typedef struct {
+    int type; 
+    int lane;
+} ZombieSpawn;
+
+typedef struct {
+    int num_zombies;
+    ZombieSpawn spawns[MAX_ZOMBIES_PER_WAVE];
+    int time_to_next_wave; // Stored in ticks (seconds * 60)
+} Wave;
+
+extern Wave level_waves[MAX_WAVES];
+extern int total_waves;
+extern int current_wave;
+extern int wave_timer;
+
+void game_init();
+void game_init_level(int level_number);
+void game_update_waves();
+void game_update();
+void game_render();
+bool game_should_quit();
+
+void game_on_key(uint8_t scancode);
+void game_on_mouse(struct packet *pp);
+
+void game_change_state(GameState new_state);
+void game_set_quit();
+
+void level_select_render(int mouse_x, int mouse_y);
+
+#endif
+</file>
+
+<file path="proj/src/proj.c">
+#include <lcom/lcf.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <unistd.h>
+
+#include "proj.h"
+#include "game.h"
+
+#include <lcom/timer.h>
+#include "keyboard.h"
+#include "mouse.h"
+#include "rtc.h"
+#include "v_card.h"
+
+uint8_t timer_bit_no;
+uint8_t kbd_bit_no;
+uint8_t mouse_bit_no;
+uint8_t rtc_bit_no;
+
+// Mouse packet assembly — the mouse sends 3 bytes per event
+static uint8_t mouse_bytes[3];
+static uint8_t mouse_byte_idx = 0;
+
+
+int system_init() {
+    if (timer_set_frequency(0, FPS) != 0) {
+        printf("Error: Failed to set Timer frequency.\n");
+        return 1;
+    }
+    if (timer_subscribe_int(&timer_bit_no) != 0) {
+        printf("Error: Failed to subscribe Timer interrupts.\n");
+        return 1;
+    }
+
+    if (kbd_subscribe_int(&kbd_bit_no) != 0) {
+        printf("Error: Failed to subscribe Keyboard interrupts.\n");
+        return 1;
+    }
+
+    if (mouse_subscribe_int(&mouse_bit_no) != 0) {
+        printf("Error: Failed to subscribe Mouse interrupts.\n");
+        return 1;
+    }
+    if (mouse_enable_data_report() != 0) {
+        printf("Error: Failed to enable Mouse data reporting.\n");
+        return 1;
+    }
+
+    if (rtc_subscribe_int(&rtc_bit_no) != 0) {
+        printf("Error: Failed to subscribe RTC interrupts.\n");
+        return 1;
+    }
+
+    if (vg_init(VIDEO_MODE) == NULL) {
+        printf("Error: Failed to initialize video mode.\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+int system_cleanup() {
+    int errors = 0;
+
+    if (mouse_disable_data_report() != 0) {
+        printf("Error: Failed to disable Mouse data reporting.\n");
+        errors = 1;
+    }
+    if (mouse_unsubscribe_int() != 0) {
+        printf("Error: Failed to unsubscribe Mouse.\n");
+        errors = 1;
+    }
+
+    if (kbd_unsubscribe_int() != 0) {
+        printf("Error: Failed to unsubscribe Keyboard.\n");
+        errors = 1;
+    }
+
+    if (timer_unsubscribe_int() != 0) {
+        printf("Error: Failed to unsubscribe Timer.\n");
+        errors = 1;
+    }
+
+    if (rtc_unsubscribe_int() != 0) {
+        printf("Error: Failed to unsubscribe RTC.\n");
+        errors = 1;
+    }
+
+    if (vg_exit() != 0) {
+        printf("Error: Failed to exit video mode.\n");
+        errors = 1;
+    }
+
+    // flush pensing keyboard inputs
+    uint8_t status, trash;
+    while (1) {
+        util_sys_inb(0x64, &status);
+        if (status & BIT(0)) { 
+            util_sys_inb(0x60, &trash); 
+        } else {
+            break;
+        }
+    }
+
+    return errors;
+}
+
+int main(int argc, char *argv[]) {
+    lcf_set_language("EN-US");
+    
+    if (lcf_start(argc, argv)) return 1;
+    
+    lcf_cleanup();
+    
+    return 0;
+}
+
+int(proj_main_loop)(int argc, char *argv[]) {
+    printf("Initializing system\n");
+
+    if (system_init() != 0) {
+        printf("System initialization failed. \n");
+        system_cleanup();
+        return 1;
+    }
+
+    game_init();
+
+    int ipc_status;
+    message msg;
+
+    while (!game_should_quit()) {
+        if (driver_receive(ANY, &msg, &ipc_status) != 0) continue;
+
+        if (is_ipc_notify(ipc_status)) {
+            switch (_ENDPOINT_P(msg.m_source)) {
+                case HARDWARE:
+                    // --- Timer interrupt: drive game logic and rendering ---
+                    if (msg.m_notify.interrupts & BIT(timer_bit_no)) {
+                        timer_int_handler();
+                        if (timer_counter % (60 / FPS) == 0) {
+                            game_update();   // logic
+                            game_render();   // draw
+                        }
+                    }
+                    // --- Keyboard interrupt ---
+                    if (msg.m_notify.interrupts & BIT(kbd_bit_no)) {
+                        kbc_ih();
+                        
+                        if (!kbd_has_error()) {
+                            game_on_key(kbd_get_scancode());
+                        }
+                    }
+                    if (msg.m_notify.interrupts & BIT(mouse_bit_no)) {
+                        mouse_ih();
+ 
+                        if (!mouse_error) {
+                            // The first byte of a packet always has bit 3 set.
+                            // Use this to re-sync if we ever lose track.
+                            if (mouse_byte_idx == 0 && !(mouse_byte & BIT(3))) {
+                                // Out of sync — discard byte and wait for a valid first byte
+                                continue;
+                            }
+            
+                            mouse_bytes[mouse_byte_idx++] = mouse_byte;
+            
+                            if (mouse_byte_idx == 3) {
+                                mouse_byte_idx = 0;
+            
+                                struct packet pp;
+                                mouse_parse_packet(&pp, mouse_bytes);
+                                game_on_mouse(&pp);
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+
+    printf("Shutting down...\n");
+
+    if (system_cleanup() != 0) {
+        printf("Failed to reset Minix state.\n");
+        return 1;
+    }
+
+    printf("System shut down successfully.\n");
+    return 0;
+}
+</file>
+
+<file path="proj/src/Makefile">
+# name of the program (Minix service)
+PROG=proj
+
+# source code files to be compiled
+SRCS = proj.c timer.c keyboard.c mouse.c rtc.c v_card.c utils.c game.c menu.c font.c entities.c
+
+# additional compilation flags
+# "-Wall -Wextra -Werror -I . -std=c11 -Wno-unused-parameter" are already set
+CPPFLAGS += -pedantic -D__LCOM_OPTIMIZED__
+CPPFLAGS += -DLEVEL_PATH=\"/home/lcom/labs/grupo_2leic13_5/proj/levels\"
+
+# list of library dependencies
+DPADD += ${LIBLCF}
+LDADD += -llcf
+
+# include LCOM's makefile that does all the "heavy lifting"
+.include <minix.lcom.mk>
+</file>
+
+<file path="proj/src/entities.c">
+#include "entities.h"
+
+#include "v_card.h"
+
+
+// colors (24-bit, same format as game.c uses)
+
+#define COL_PEA     0x90EE90
+
+#define COL_ZOMBIE  0x444444
+
+#define COL_ZHEAD   0x90EE90
+
+#define COL_ZEYE    0xFF0000
+
+#define COL_FROZEN  0x0000FF
+
+#define COL_SUN     0xFFFF00
+
+#define COL_SUNCORE 0xFFA500
+
+
+// entity arrays
+
+zombie_t zombies[MAX_ZOMBIES];
+
+projectile_t projectiles[MAX_PROJECTILES];
+
+sun_t suns_array[MAX_SUNS];
+
+
+void entities_init() {
+
+    for (int i = 0; i < MAX_ZOMBIES; i++) zombies[i].active = false;
+
+    for (int i = 0; i < MAX_PROJECTILES; i++) projectiles[i].active = false;
+
+    for (int i = 0; i < MAX_SUNS; i++) suns_array[i].active = false;
+
+}
+
+
+void spawn_zombie(uint8_t lane, int level) {
+
+    for (int i = 0; i < MAX_ZOMBIES; i++) {
+
+        if (!zombies[i].active) {
+
+            zombies[i].active = true;
+
+            zombies[i].x = 780;
+
+            zombies[i].lane = lane;
+
+            zombies[i].hp = 250 + level * 20;
+
+            zombies[i].speed = 2;
+
+            zombies[i].eating = false;
+
+            zombies[i].eat_timer = 0;
+
+            return;
+
+        }
+
+    }
+
+}
+
+
+void spawn_projectile(uint8_t lane, int16_t x, int16_t y) {
+
+    for (int i = 0; i < MAX_PROJECTILES; i++) {
+
+        if (!projectiles[i].active) {
+
+            projectiles[i].active = true;
+
+            projectiles[i].x = x;
+
+            projectiles[i].y = y;
+
+            projectiles[i].lane = lane;
+
+            projectiles[i].damage = 20;
+
+            return;
+
+        }
+
+    }
+
+}
+
+
+void spawn_sun(int16_t x, int16_t start_y, int16_t target_y) {
+
+    for (int i = 0; i < MAX_SUNS; i++) {
+
+        if (!suns_array[i].active) {
+
+            suns_array[i].active = true;
+
+            suns_array[i].x = x;
+
+            suns_array[i].y = start_y;
+
+            suns_array[i].target_y = target_y;
+
+            suns_array[i].lifetime = 600;
+
+            return;
+
+        }
+
+    }
+
+}
+
+
+int entities_zombies_alive() {
+
+    int count = 0;
+
+    for (int i = 0; i < MAX_ZOMBIES; i++)
+
+        if (zombies[i].active) count++;
+
+    return count;
+
+}
+
+
+bool entities_collect_sun(int16_t mx, int16_t my, int *suns_count) {
+
+    for (int i = 0; i < MAX_SUNS; i++) {
+
+        if (!suns_array[i].active) continue;
+
+        if (mx >= suns_array[i].x - 15 && mx <= suns_array[i].x + 15 &&
+
+            my >= suns_array[i].y - 15 && my <= suns_array[i].y + 15) {
+
+            *suns_count += 25;
+
+            suns_array[i].active = false;
+
+            return true;
+
+        }
+
+    }
+
+    return false;
+
+}
+
+
+// grid constants must match game.c
+
+#define GRID_START_X 40
+
+#define GRID_COLS    9
+
+#define CELL_SIZE    80
+
+
+bool entities_update(plant_cell_t grid[5][9], int *suns_count, int *score,
+
+                     int level, bool frozen, uint32_t tc) {
+
+
+    // update plants — shooting and sun generation
+
+    for (int r = 0; r < 5; r++) {
+
+        for (int c = 0; c < 9; c++) {
+
+            if (grid[r][c].type == 2) { // peashooter
+
+                grid[r][c].shoot_timer++;
+
+                if (grid[r][c].shoot_timer >= 84) {
+
+                    grid[r][c].shoot_timer = 0;
+
+                    // only shoot if zombie in lane
+
+                    bool has_zombie = false;
+                    int plant_x = GRID_START_X + c * CELL_SIZE;
+
+                    for (int z = 0; z < MAX_ZOMBIES; z++){
+
+                        if (zombies[z].active && zombies[z].lane == r) {
+                            if (zombies[z].x > plant_x) {
+                                has_zombie = true; 
+                                break;
+                            }
+                        }
+                    }
+                    if (has_zombie) {
+
+                        grid[r][c].shoot_timer = 0;
+                        int px = plant_x + CELL_SIZE;
+                        int py = 150 + r * CELL_SIZE + CELL_SIZE / 2;
+                        spawn_projectile(r, px, py);
+
+                    }
+
+                }
+
+            }
+
+            else if (grid[r][c].type == 1) { // sunflower
+
+                grid[r][c].sun_timer++;
+
+                if (grid[r][c].sun_timer >= 1440) {
+
+                    grid[r][c].sun_timer = 0;
+
+                    int sx = GRID_START_X + c * CELL_SIZE + 20 + (rand() % 40);
+
+                    int sy = 150 + r * CELL_SIZE + 20 + (rand() % 40);
+
+                    spawn_sun(sx, sy, sy);
+
+                }
+
+            }
+
+        }
+
+    }
+
+
+    // update projectiles
+
+    for (int i = 0; i < MAX_PROJECTILES; i++) {
+
+        if (!projectiles[i].active) continue;
+
+        projectiles[i].x += 4;
+
+        if (projectiles[i].x > 800) { projectiles[i].active = false; continue; }
+
+
+        // check hit zombie
+
+        for (int z = 0; z < MAX_ZOMBIES; z++) {
+
+            if (!zombies[z].active || zombies[z].lane != projectiles[i].lane) continue;
+
+            if (projectiles[i].x >= zombies[z].x - 5 && projectiles[i].x <= zombies[z].x + 30) {
+
+                zombies[z].hp -= projectiles[i].damage;
+
+                projectiles[i].active = false;
+
+                if (zombies[z].hp <= 0) {
+
+                    zombies[z].active = false;
+
+                    *score += 10;
+
+                }
+
+                break;
+
+            }
+
+        }
+
+    }
+
+
+    // update suns
+
+    for (int i = 0; i < MAX_SUNS; i++) {
+
+        if (!suns_array[i].active) continue;
+
+        if (suns_array[i].y < suns_array[i].target_y) suns_array[i].y += 1;
+
+        suns_array[i].lifetime--;
+
+        if (suns_array[i].lifetime == 0) suns_array[i].active = false;
+
+    }
+
+
+    // update zombies
+
+    for (int z = 0; z < MAX_ZOMBIES; z++) {
+
+        if (!zombies[z].active) continue;
+
+        if (frozen) continue;
+
+
+        int col = (zombies[z].x - GRID_START_X) / CELL_SIZE;
+
+        int row = zombies[z].lane;
+
+
+        if (col >= 0 && col < GRID_COLS && grid[row][col].type != 0 &&
+
+            zombies[z].x <= GRID_START_X + (col + 1) * CELL_SIZE) {
+
+            // eating plant
+
+            zombies[z].eating = true;
+
+            zombies[z].eat_timer++;
+
+            if (zombies[z].eat_timer >= 60) {
+
+                zombies[z].eat_timer = 0;
+
+                grid[row][col].hp -= 100;
+
+                if (grid[row][col].hp <= 0) {
+
+                    grid[row][col].type = 0;
+
+                    zombies[z].eating = false;
+
+                }
+
+            }
+
+        } else {
+
+            zombies[z].eating = false;
+
+            zombies[z].eat_timer = 0;
+
+            if (tc % 7 == 0) {
+                zombies[z].x -= zombies[z].speed;
+            }
+
+        }
+
+
+        // game over check
+
+        if (zombies[z].x <= GRID_START_X - 30) {
+
+            return true; // game over
+
+        }
+
+    }
+
+
+    // drop suns from sky (using timer_counter)
+
+    if (tc % 300 == 0) {
+
+        int16_t sx = GRID_START_X + (rand() % (GRID_COLS * CELL_SIZE));
+        int16_t sy = 150 + (rand() % (5 * CELL_SIZE));
+        spawn_sun(sx, 0, sy);
+
+    }
+
+
+    return false; // not game over
+
+}
+
+
+void entities_render(int grid_x, int grid_y, int cell_h, bool frozen) {
+
+    // projectiles
+
+    for (int i = 0; i < MAX_PROJECTILES; i++) {
+
+        if (!projectiles[i].active) continue;
+
+        vg_draw_rectangle(projectiles[i].x, projectiles[i].y - 4, 8, 8, COL_PEA);
+
+    }
+
+
+    // zombies
+
+    for (int z = 0; z < MAX_ZOMBIES; z++) {
+
+        if (!zombies[z].active) continue;
+
+        int zy = grid_y + zombies[z].lane * cell_h + 10;
+
+        uint32_t col = frozen ? COL_FROZEN : COL_ZOMBIE;
+
+        vg_draw_rectangle(zombies[z].x, zy, 25, 55, col);
+
+        vg_draw_rectangle(zombies[z].x + 3, zy - 15, 20, 18, COL_ZHEAD);
+
+        vg_draw_rectangle(zombies[z].x + 7, zy - 10, 4, 4, COL_ZEYE);
+
+        vg_draw_rectangle(zombies[z].x + 15, zy - 10, 4, 4, COL_ZEYE);
+
+    }
+
+
+    // suns
+
+    for (int i = 0; i < MAX_SUNS; i++) {
+
+        if (!suns_array[i].active) continue;
+
+        vg_draw_rectangle(suns_array[i].x - 12, suns_array[i].y - 12, 24, 24, COL_SUN);
+
+        vg_draw_rectangle(suns_array[i].x - 8, suns_array[i].y - 8, 16, 16, COL_SUNCORE);
+
+    }
+
+}
+</file>
+
+<file path="proj/src/game.c">
+#include "game.h"
+#include "menu.h"
+#include "v_card.h"
+#include "i8042.h"
+#include "proj.h"
+#include <stdlib.h>
+#include "font.h"
+#include "entities.h"
+#include "rtc.h"
+#include <stdio.h>
+#include <string.h>
+
+// Global variables for wave system
+Wave level_waves[MAX_WAVES];
+int total_waves = 0;
+int current_wave = 0;
+int wave_timer = 0;
+int current_level = 1;
+
+// screen dimensions
+#define SCREEN_W 800
+#define SCREEN_H 600
+
+
+#define COLOR_BG      0x228B22
+#define COLOR_UI      0x3b4d24
+#define COLOR_CELL    0x32CD32
+#define COLOR_PLANT   0x00FF00
+#define COLOR_CURSOR  0xFFFFFF
+
+static GameState current_state = MAIN_MENU;
+
+#define GRID_COLS 9
+#define GRID_ROWS 5
+#define CELL_SIZE 80
+#define GRID_START_X 40
+#define GRID_START_Y 150
+
+//Levels page constants
+#define SQ_SIZE 60
+#define SQ_GAP 20
+#define SQ_START_X 210
+#define SQ_START_Y 200
+
+// mouse state
+static int16_t mouse_x, mouse_y;
+static bool prev_lb = false; // store if left btn was pressed in last frame
+#define CURSOR_SIZE 8
+
+static int grid[GRID_ROWS][GRID_COLS];
+
+static bool quit = false;
+
+// game entities and state
+static plant_cell_t plant_grid[5][9];
+static int suns_count = 150;
+static int score = 0;
+static int level = 1;
+static int selected_plant = 1;  // 1=sunflower, 2=peashooter
+static bool frozen = false;
+static uint32_t freeze_timer = 0;
+static int suns_spent = 0;
+
+// wave spawning
+static int zombies_to_spawn = 0;
+static uint32_t spawn_timer = 0;
+static bool wave_active = false;
+
+// RTC
+static uint32_t rtc_timer = 0;
+static rtc_date current_time;
+#define ESC_BREAKCODE 0x81
+
+void game_change_state(GameState new_state) {
+    current_state = new_state;
+}
+
+void game_set_quit() {
+    quit = true;
+}
+
+void game_init() {
+    mouse_x = SCREEN_W / 2;
+    mouse_y = SCREEN_H / 2;
+
+    for (int r = 0; r < GRID_ROWS; r++) {
+        for (int c = 0; c < GRID_COLS; c++) {
+            grid[r][c] = 0;
+        }
+    }
+
+    entities_init();
+
+    suns_count = 150;
+    score = 0;
+    level = 1;
+    selected_plant = 1;
+    frozen = false;
+    freeze_timer = 0;
+    zombies_to_spawn = 0;
+    spawn_timer = 0;
+    wave_active = false;
+    rtc_timer = 0;
+    suns_spent = 0;
+
+    for (int r = 0; r < GRID_ROWS; r++) {
+        for (int c = 0; c < GRID_COLS; c++) {
+            plant_grid[r][c].type = 0;
+            plant_grid[r][c].hp = 0;
+            plant_grid[r][c].shoot_timer = 0;
+            plant_grid[r][c].sun_timer = 0;
+        }
+    }
+
+    rtc_read_date(&current_time);
+
+    srand(current_time.seconds + current_time.minutes * 60);
+}
+
+void game_init_level(int level_number) {
+    current_level = level_number;
+
+    total_waves = 0;
+    current_wave = 0;
+    wave_timer = 5 * 60; // fallback initial delay
+
+    entities_init();
+    memset(plant_grid, 0, sizeof(plant_grid));
+
+    suns_count = 50;
+    score = 0;
+    suns_spent = 0;
+    frozen = false;
+    freeze_timer = 0;
+    selected_plant = 1;
+
+    char filepath[256];
+#ifdef LEVEL_PATH
+    snprintf(filepath, sizeof(filepath), LEVEL_PATH "/level%d.txt", level_number);
+#else
+    snprintf(filepath, sizeof(filepath), "../levels/level%d.txt", level_number);
+#endif
+
+    FILE *file = fopen(filepath, "r");
+    if (!file) {
+        printf("Warning: Could not open %s\n", filepath);
+        if (level_number == 1) {
+            wave_timer = 5 * 60;
+            total_waves = 2;
+            level_waves[0].num_zombies = 2;
+            level_waves[0].spawns[0].type = 1; level_waves[0].spawns[0].lane = 1;
+            level_waves[0].spawns[1].type = 1; level_waves[0].spawns[1].lane = 2;
+            level_waves[0].time_to_next_wave = 3 * 60;
+            level_waves[1].num_zombies = 1;
+            level_waves[1].spawns[0].type = 1; level_waves[1].spawns[0].lane = 2;
+            level_waves[1].time_to_next_wave = 3 * 60;
+        } else {
+            wave_timer = 5 * 60;
+            total_waves = 2;
+            level_waves[0].num_zombies = 2;
+            level_waves[0].spawns[0].type = 1; level_waves[0].spawns[0].lane = 1;
+            level_waves[0].spawns[1].type = 1; level_waves[0].spawns[1].lane = 3;
+            level_waves[0].time_to_next_wave = 5 * 60;
+            level_waves[1].num_zombies = 3;
+            level_waves[1].spawns[0].type = 1; level_waves[1].spawns[0].lane = 0;
+            level_waves[1].spawns[1].type = 1; level_waves[1].spawns[1].lane = 2;
+            level_waves[1].spawns[2].type = 1; level_waves[1].spawns[2].lane = 4;
+            level_waves[1].time_to_next_wave = 5 * 60;
+        }
+        return;
+    }
+    printf("Opened level file: %s\n", filepath);
+
+    char line[512];
+    int initial_delay = 5; // default if first line is missing/unparseable
+
+    // First non-empty line: time before first wave (seconds)
+    while (fgets(line, sizeof(line), file)) {
+        if (line[0] == '\n' || line[0] == '\r' || line[0] == '\0') continue;
+        sscanf(line, "%d", &initial_delay);
+        break;
+    }
+
+    // Remaining lines: one wave per line
+    // Format: num_zombies,(type,lane)(type,lane)...,time_to_next_wave
+    while (fgets(line, sizeof(line), file)) {
+        if (total_waves >= MAX_WAVES) break;
+        if (line[0] == '\n' || line[0] == '\r' || line[0] == '\0') continue;
+
+        Wave *w = &level_waves[total_waves];
+        char *ptr = line;
+
+        // A. Number of zombies
+        if (sscanf(ptr, "%d", &w->num_zombies) != 1) continue;
+        ptr = strchr(ptr, ',');
+        if (!ptr) continue;
+        ptr++;
+
+        if (w->num_zombies > MAX_ZOMBIES_PER_WAVE)
+            w->num_zombies = MAX_ZOMBIES_PER_WAVE;
+
+        // B. Zombie entries: (type,lane)(type,lane)...
+        for (int i = 0; i < w->num_zombies; i++) {
+            int offset = 0;
+            if (sscanf(ptr, "(%d,%d)%n",
+                       &w->spawns[i].type,
+                       &w->spawns[i].lane,
+                       &offset) == 2) {
+                ptr += offset;
+            }
+        }
+
+        // C. Time to next wave
+        while (*ptr == ',' || *ptr == ' ') ptr++;
+        int time_sec = 0;
+        if (sscanf(ptr, "%d", &time_sec) == 1) {
+            w->time_to_next_wave = time_sec * 60;
+        } else {
+            w->time_to_next_wave = 10 * 60;
+        }
+
+        printf("Loaded wave %d: %d zombies, next in %d ticks\n",
+               total_waves, w->num_zombies, w->time_to_next_wave);
+        total_waves++;
+    }
+
+    fclose(file);
+
+    // Set the initial delay AFTER parsing, so it is never overwritten
+    wave_timer = initial_delay * 60;
+
+    printf("Level %d loaded: %d waves, initial delay %d ticks\n",
+           level_number, total_waves, wave_timer);
+}
+
+void game_update_waves() {
+    if (total_waves == 0) return;
+
+    if (current_wave >= total_waves) {
+        // All waves dispatched. Count down the post-last-wave timer before
+        // allowing completion, so the last wave's zombies have time to appear.
+        if (wave_timer > 0) {
+            wave_timer--;
+        } else if (entities_zombies_alive() == 0) {
+            game_change_state(LEVEL_COMPLETE);
+        }
+        return;
+    }
+
+    if (wave_timer > 0) {
+        wave_timer--;
+        return; // Still counting down - don't spawn yet.
+    }
+
+    // wave_timer == 0: time to spawn this wave.
+    {
+        Wave *w = &level_waves[current_wave];
+        
+        // 1. Take a snapshot of which zombie slots are currently empty
+        bool was_empty[MAX_ZOMBIES];
+        for (int z = 0; z < MAX_ZOMBIES; z++) {
+            was_empty[z] = !zombies[z].active;
+        }
+
+        // 2. Spawn all zombies for this wave (they will temporarily overlap)
+        for (int i = 0; i < w->num_zombies; i++) {
+            uint8_t lane = (uint8_t)(w->spawns[i].lane);
+            if (lane >= GRID_ROWS) lane = GRID_ROWS - 1; // clamp to valid row
+            spawn_zombie(lane, current_level);
+        }
+        
+        // 3. Find the newly spawned zombies and apply an incremental X offset
+        int lane_offsets[5] = {0}; // Tracks how many zombies we've adjusted per lane
+        
+        for (int z = 0; z < MAX_ZOMBIES; z++) {
+            // If the slot was empty before, but is now active, it's a new spawn!
+            if (was_empty[z] && zombies[z].active) {
+                uint8_t lane = zombies[z].lane;
+                
+                // Push the zombie further to the right based on how many 
+                // others spawned in this lane before it.
+                // (e.g., 1st zombie gets +0, 2nd gets +50, 3rd gets +100)
+                zombies[z].x += lane_offsets[lane] * 50; 
+                
+                // Increment the offset multiplier for the next zombie in this lane
+                lane_offsets[lane]++; 
+            }
+        }
+        
+        wave_timer = w->time_to_next_wave;
+        current_wave++;
+    }
+}
+
+void game_update() {
+    if (current_state == PLAYING) {
+        game_update_waves();
+        if (frozen) {
+            if (freeze_timer > 0) {
+                freeze_timer--;
+            }
+
+            if (freeze_timer == 0) {
+                frozen = false;
+            }
+        }
+
+        bool game_over = entities_update(
+            plant_grid,
+            &suns_count,
+            &score,
+            level,
+            frozen,
+            timer_counter
+        );
+
+        if (game_over) {
+            rtc_read_date(&current_time);
+            current_state = MAIN_MENU;
+        }
+
+        rtc_timer++;
+        if (rtc_timer >= 60) {
+            rtc_read_date(&current_time);
+            rtc_timer = 0;
+        }
+    }
+}
+
+void game_render() {
+    if (current_state == MAIN_MENU) {
+        menu_render(mouse_x, mouse_y);
+    }
+    else if (current_state == LEVEL_SELECT) {
+        level_select_render(mouse_x, mouse_y);
+    }
+    else if (current_state == PLAYING) {
+        vg_clear(COLOR_BG);
+
+        // top UI bar
+        vg_draw_rectangle(0, 0, SCREEN_W, 100, COLOR_UI);
+
+        // draw grid background
+        for (int r = 0; r < GRID_ROWS; r++) {
+            for (int c = 0; c < GRID_COLS; c++) {
+                int cell_x = GRID_START_X + c * CELL_SIZE;
+                int cell_y = GRID_START_Y + r * CELL_SIZE;
+
+                vg_draw_rectangle(
+                    cell_x + 2,
+                    cell_y + 2,
+                    CELL_SIZE - 4,
+                    CELL_SIZE - 4,
+                    COLOR_CELL
+                );
+            }
+        }
+
+        // draw plants
+        for (int r = 0; r < GRID_ROWS; r++) {
+            for (int c = 0; c < GRID_COLS; c++) {
+                int cell_x = GRID_START_X + c * CELL_SIZE;
+                int cell_y = GRID_START_Y + r * CELL_SIZE;
+
+                if (plant_grid[r][c].type == 1) {
+                    // sunflower
+                    vg_draw_rectangle(cell_x + 20, cell_y + 15, 40, 40, 0xFFFF00);
+                    vg_draw_rectangle(cell_x + 28, cell_y + 23, 24, 24, 0x8B4513);
+                }
+                else if (plant_grid[r][c].type == 2) {
+                    // peashooter
+                    vg_draw_rectangle(cell_x + 20, cell_y + 15, 40, 40, 0x00FF00);
+                    vg_draw_rectangle(cell_x + 50, cell_y + 30, 12, 10, 0x228B22);
+                }
+            }
+        }
+
+        // draw zombies, projectiles and suns
+        entities_render(GRID_START_X, GRID_START_Y, CELL_SIZE, frozen);
+
+        // HUD
+        font_draw_string("SUNS:", 10, 15, 0xFFFF00);
+        font_draw_number(suns_count, 80, 15, 0xFFFF00);
+
+        font_draw_string("SCORE:", 200, 15, 0xFFFFFF);
+        font_draw_number(score, 280, 15, 0xFFFFFF);
+
+        font_draw_string("LVL:", 400, 15, 0xFFFFFF);
+        font_draw_number(level, 450, 15, 0xFFFFFF);
+
+        //draw pant options
+        uint32_t sun_color = (selected_plant == 1) ? 0xFFFF00 : 0x888888;
+        uint32_t pea_color = (selected_plant == 2) ? 0x00FF00 : 0x888888;
+
+        font_draw_string("1-SUN", 10, 60, sun_color);
+        font_draw_string("2-PEA", 110, 60, pea_color);
+
+        if (frozen) {
+            font_draw_string("FROZEN", 500, 60, 0x0000FF);
+        }
+
+        // RTC time
+        char ts[9];
+        ts[0] = '0' + current_time.hours / 10;
+        ts[1] = '0' + current_time.hours % 10;
+        ts[2] = ':';
+        ts[3] = '0' + current_time.minutes / 10;
+        ts[4] = '0' + current_time.minutes % 10;
+        ts[5] = ':';
+        ts[6] = '0' + current_time.seconds / 10;
+        ts[7] = '0' + current_time.seconds % 10;
+        ts[8] = '\0';
+
+        font_draw_string(ts, 680, 15, 0xFFFFFF);
+    }
+    else if (current_state == LEVEL_COMPLETE) {
+        vg_clear(COLOR_BG);
+
+        vg_draw_rectangle(0, 0, SCREEN_W, 100, COLOR_UI);
+
+        // draw grid
+        for (int r = 0; r < GRID_ROWS; r++) {
+            for (int c = 0; c < GRID_COLS; c++) {
+                int cell_x = GRID_START_X + c * CELL_SIZE;
+                int cell_y = GRID_START_Y + r * CELL_SIZE;
+
+                vg_draw_rectangle(
+                    cell_x + 2,
+                    cell_y + 2,
+                    CELL_SIZE - 4,
+                    CELL_SIZE - 4,
+                    COLOR_CELL
+                );
+            }
+        }
+        
+        // draw results
+        font_draw_string("LEVEL COMPLETE!", 300, 250, 0xFF0000);
+        
+        font_draw_string("SUNS SPENT:", 300, 300, 0xFF0000);
+        font_draw_number(suns_spent, 450, 300, 0xFF0000);
+
+        font_draw_string("PRESS ESC TO RETURN", 250, 400, 0xFF0000);
+        
+        vg_flip();
+    }
+
+
+    // draw mouse 
+    vg_draw_rectangle(mouse_x - CURSOR_SIZE / 2, mouse_y - 1, CURSOR_SIZE, 2, COLOR_CURSOR);
+    vg_draw_rectangle(mouse_x - 1, mouse_y - CURSOR_SIZE / 2, 2, CURSOR_SIZE, COLOR_CURSOR);
+
+    vg_flip();
+}
+
+bool game_should_quit() {
+    return quit;
+}
+
+void game_on_key(uint8_t scancode) {
+    if (current_state == MAIN_MENU) {
+        menu_on_key(scancode);
+    } 
+    else if (current_state == LEVEL_SELECT) {
+        if (scancode == 0x81) { 
+            current_state = MAIN_MENU;
+        }
+    }
+    else if (current_state == PLAYING) {
+        if (scancode == ESC_BREAKCODE) {
+            current_state = MAIN_MENU;
+        }
+
+        if (scancode == 0x02) {
+            selected_plant = 1;
+        }
+
+        if (scancode == 0x03) {
+            selected_plant = 2;
+        }
+
+        if (scancode == 0x39 && !frozen) {
+            frozen = true;
+            freeze_timer = 180;
+        }
+
+    } else if (current_state == LEVEL_COMPLETE) {
+        if (scancode == ESC_BREAKCODE) {
+            current_state = MAIN_MENU;
+        }
+    }
+}
+
+void game_on_mouse(struct packet *pp) {
+    // update mouse
+    mouse_x += pp->delta_x;
+    mouse_y -= pp->delta_y;
+
+    // mouse limits
+    if (mouse_x < 0) mouse_x = 0;
+    if (mouse_x >= SCREEN_W) mouse_x = SCREEN_W - 1;
+    if (mouse_y < 0) mouse_y = 0;
+    if (mouse_y >= SCREEN_H) mouse_y = SCREEN_H - 1;
+
+    //handle click
+    if (current_state == MAIN_MENU) {
+        menu_on_mouse(pp, mouse_x, mouse_y);
+    } 
+    else if (current_state == LEVEL_SELECT) {
+        static bool lvl_prev_lb = false;
+        if (pp->lb && !lvl_prev_lb) {
+            
+            // Loop through your 10 squares
+            for (int i = 0; i < 10; i++) {
+                int row = i / 5;
+                int col = i % 5;
+                int bx = SQ_START_X + col * (SQ_SIZE + SQ_GAP);
+                int by = SQ_START_Y + row * (SQ_SIZE + SQ_GAP);
+
+                if (mouse_x >= bx && mouse_x <= bx + SQ_SIZE &&
+                    mouse_y >= by && mouse_y <= by + SQ_SIZE) {
+                    
+                    // Call the parser instead of just assigning a variable!
+                    game_init_level(i + 1); 
+                    game_change_state(PLAYING);
+                    break;
+                }
+            }
+        }
+        lvl_prev_lb = pp->lb;
+    }
+    else if (current_state == PLAYING) {
+        if (pp->lb && !prev_lb) {
+            // try to collect sun first
+            bool sun_collected = entities_collect_sun(mouse_x, mouse_y, &suns_count);
+
+            // plant only if click is inside the grid
+            if(!sun_collected){
+                if (mouse_x >= GRID_START_X &&
+                    mouse_x < GRID_START_X + GRID_COLS * CELL_SIZE &&
+                    mouse_y >= GRID_START_Y &&
+                    mouse_y < GRID_START_Y + GRID_ROWS * CELL_SIZE) {
+
+                    int col = (mouse_x - GRID_START_X) / CELL_SIZE;
+                    int row = (mouse_y - GRID_START_Y) / CELL_SIZE;
+
+                    if (plant_grid[row][col].type == 0) {
+                        int cost = selected_plant == 1 ? 50 : 100;
+
+                        if (suns_count >= cost) {
+                            plant_grid[row][col].type = selected_plant;
+                            plant_grid[row][col].hp = 300;
+                            plant_grid[row][col].shoot_timer = 0;
+                            plant_grid[row][col].sun_timer = 0;
+                            suns_count -= cost;
+                            suns_spent += cost;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    prev_lb = pp->lb;
+}
+
+void level_select_render(int mouse_x, int mouse_y) {
+    vg_clear(0x111111);
+
+    font_draw_string("SELECT A LEVEL", 310, 100, 0xFFFFFF);
+
+    // Draw 10 squares arranged into 2 rows of 5
+    for (int i = 0; i < 10; i++) {
+        int row = i / 5;
+        int col = i % 5;
+        int bx = SQ_START_X + col * (SQ_SIZE + SQ_GAP);
+        int by = SQ_START_Y + row * (SQ_SIZE + SQ_GAP);
+
+        uint32_t color = 0x444444; 
+        if (mouse_x >= bx && mouse_x <= bx + SQ_SIZE &&
+            mouse_y >= by && mouse_y <= by + SQ_SIZE) {
+            color = 0x0088FF; 
+        }
+
+        vg_draw_rectangle(bx, by, SQ_SIZE, SQ_SIZE, color);
+        
+        int text_offset_x = (i == 9) ? 19 : 25; 
+        font_draw_number(i + 1, bx + text_offset_x, by + 22, 0xFFFFFF);
+    }
+
+    uint32_t back_color = 0x555555;
+    if (mouse_x >= 300 && mouse_x <= 500 && mouse_y >= 410 && mouse_y <= 460) {
+        back_color = 0x888888;
+    }
+    vg_draw_rectangle(300, 410, 200, 50, back_color);
+    font_draw_string("BACK", 376, 426, 0xFFFFFF);
+}
+</file>
+
+</files>
