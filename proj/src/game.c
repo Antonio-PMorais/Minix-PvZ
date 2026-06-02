@@ -7,6 +7,30 @@
 #include "font.h"
 #include "entities.h"
 #include "rtc.h"
+#include "sprites/sunflower.xpm"
+#include "sprites/sun.xpm"
+#include "sprites/peashooter.xpm"
+#include "sprites/grass_grid.xpm"
+#include "sprites/peashooter_projectile.xpm"
+#include "sprites/zombie_default.xpm"
+
+xpm_image_t sunflower_img;
+uint8_t *sunflower_pixmap = NULL;
+
+xpm_image_t sun_img;
+uint8_t *sun_pixmap = NULL;
+
+xpm_image_t peashooter_img;
+uint8_t *peashooter_pixmap = NULL;
+
+xpm_image_t grass_grid_img;
+uint8_t *grass_grid_pixmap = NULL;
+
+xpm_image_t peashooter_projectile_img;
+uint8_t *peashooter_projectile_pixmap = NULL;
+
+xpm_image_t zombie_default_img;
+uint8_t *zombie_default_pixmap = NULL;
 
 // screen dimensions
 #define SCREEN_W 800
@@ -23,9 +47,10 @@ static GameState current_state = MAIN_MENU;
 
 #define GRID_COLS 9
 #define GRID_ROWS 5
-#define CELL_SIZE 80
-#define GRID_START_X 40
-#define GRID_START_Y 150
+#define CELL_W 89
+#define CELL_H 100
+#define GRID_START_X 0
+#define GRID_START_Y 100
 
 // mouse state
 static int16_t mouse_x, mouse_y;
@@ -95,6 +120,37 @@ void game_init() {
             plant_grid[r][c].shoot_timer = 0;
             plant_grid[r][c].sun_timer = 0;
         }
+    }
+
+    // load sprites pixelmaps
+    sunflower_pixmap = xpm_load((xpm_map_t) sunflower_xpm, XPM_8_8_8_8, &sunflower_img);
+    if (sunflower_pixmap == NULL) {
+        printf("Error in loading sunflower xpm\n");
+    }
+
+    sun_pixmap = xpm_load((xpm_map_t) sun_xpm, XPM_8_8_8_8, &sun_img);
+    if (sun_pixmap == NULL) {
+        printf("Error in loading sun xpm.\n");
+    }
+
+    peashooter_pixmap = xpm_load((xpm_map_t) peashooter_xpm, XPM_8_8_8_8, &peashooter_img);
+    if (peashooter_pixmap == NULL) {
+        printf("Error in loading peashooter xpm.\n");
+    }
+
+    grass_grid_pixmap = xpm_load((xpm_map_t) grass_grid_xpm, XPM_8_8_8_8, &grass_grid_img);
+    if (grass_grid_pixmap == NULL) {
+        printf("Error in loading background xpm.\n");
+    }
+
+    peashooter_projectile_pixmap = xpm_load((xpm_map_t) peashooter_projectile_xpm, XPM_8_8_8_8, &peashooter_projectile_img);
+    if (peashooter_projectile_pixmap == NULL) {
+        printf("Error on loading peashooter projectile xpm.\n");
+    }
+
+    zombie_default_pixmap = xpm_load((xpm_map_t) zombie_default_xpm, XPM_8_8_8_8, &zombie_default_img);
+    if (zombie_default_pixmap == NULL) {
+        printf("Error on loading zombie default xpm.\n");
     }
 
     rtc_read_date(&current_time);
@@ -181,42 +237,39 @@ void game_render() {
         vg_draw_rectangle(0, 0, SCREEN_W, 100, COLOR_UI);
 
         // draw grid background
-        for (int r = 0; r < GRID_ROWS; r++) {
-            for (int c = 0; c < GRID_COLS; c++) {
-                int cell_x = GRID_START_X + c * CELL_SIZE;
-                int cell_y = GRID_START_Y + r * CELL_SIZE;
-
-                vg_draw_rectangle(
-                    cell_x + 2,
-                    cell_y + 2,
-                    CELL_SIZE - 4,
-                    CELL_SIZE - 4,
-                    COLOR_CELL
-                );
-            }
+        if (grass_grid_pixmap != NULL) {
+            vg_draw_xpm(grass_grid_img, grass_grid_pixmap, 0, 100);
         }
 
         // draw plants
         for (int r = 0; r < GRID_ROWS; r++) {
             for (int c = 0; c < GRID_COLS; c++) {
-                int cell_x = GRID_START_X + c * CELL_SIZE;
-                int cell_y = GRID_START_Y + r * CELL_SIZE;
+                int cell_x = GRID_START_X + c * CELL_W;
+                int cell_y = GRID_START_Y + r * CELL_H;
 
                 if (plant_grid[r][c].type == 1) {
                     // sunflower
-                    vg_draw_rectangle(cell_x + 20, cell_y + 15, 40, 40, 0xFFFF00);
-                    vg_draw_rectangle(cell_x + 28, cell_y + 23, 24, 24, 0x8B4513);
+                    if (sunflower_pixmap != NULL) {
+                        int center_x = cell_x + (CELL_W - sunflower_img.width) / 2;
+                        int center_y = cell_y + (CELL_H - sunflower_img.height) / 2;
+                        
+                        vg_draw_xpm(sunflower_img, sunflower_pixmap, center_x, center_y);
+                    }
                 }
                 else if (plant_grid[r][c].type == 2) {
                     // peashooter
-                    vg_draw_rectangle(cell_x + 20, cell_y + 15, 40, 40, 0x00FF00);
-                    vg_draw_rectangle(cell_x + 50, cell_y + 30, 12, 10, 0x228B22);
+                    if (peashooter_pixmap != NULL) {
+                        int center_x = cell_x + (CELL_W - peashooter_img.width) / 2;
+                        int center_y = cell_y + (CELL_H - peashooter_img.height) / 2;
+                        
+                        vg_draw_xpm(peashooter_img, peashooter_pixmap, center_x, center_y);
+                    }
                 }
             }
         }
 
         // draw zombies, projectiles and suns
-        entities_render(GRID_START_X, GRID_START_Y, CELL_SIZE, frozen);
+        entities_render(GRID_START_X, GRID_START_Y, CELL_W, CELL_H, frozen);
 
         // HUD
         font_draw_string("SUNS:", 10, 15, 0xFFFF00);
@@ -228,7 +281,7 @@ void game_render() {
         font_draw_string("LVL:", 400, 15, 0xFFFFFF);
         font_draw_number(level, 450, 15, 0xFFFFFF);
 
-        //draw pant options
+        //draw plant options
         uint32_t sun_color = (selected_plant == 1) ? 0xFFFF00 : 0x888888;
         uint32_t pea_color = (selected_plant == 2) ? 0x00FF00 : 0x888888;
 
@@ -259,19 +312,8 @@ void game_render() {
         vg_draw_rectangle(0, 0, SCREEN_W, 100, COLOR_UI);
 
         // draw grid
-        for (int r = 0; r < GRID_ROWS; r++) {
-            for (int c = 0; c < GRID_COLS; c++) {
-                int cell_x = GRID_START_X + c * CELL_SIZE;
-                int cell_y = GRID_START_Y + r * CELL_SIZE;
-
-                vg_draw_rectangle(
-                    cell_x + 2,
-                    cell_y + 2,
-                    CELL_SIZE - 4,
-                    CELL_SIZE - 4,
-                    COLOR_CELL
-                );
-            }
+        if (grass_grid_pixmap != NULL) {
+            vg_draw_xpm(grass_grid_img, grass_grid_pixmap, 5, 100);
         }
         
         // draw results
@@ -349,12 +391,12 @@ void game_on_mouse(struct packet *pp) {
             // plant only if click is inside the grid
             if(!sun_collected){
                 if (mouse_x >= GRID_START_X &&
-                    mouse_x < GRID_START_X + GRID_COLS * CELL_SIZE &&
+                    mouse_x < GRID_START_X + GRID_COLS * CELL_W &&
                     mouse_y >= GRID_START_Y &&
-                    mouse_y < GRID_START_Y + GRID_ROWS * CELL_SIZE) {
+                    mouse_y < GRID_START_Y + GRID_ROWS * CELL_H) {
 
-                    int col = (mouse_x - GRID_START_X) / CELL_SIZE;
-                    int row = (mouse_y - GRID_START_Y) / CELL_SIZE;
+                    int col = (mouse_x - GRID_START_X) / CELL_W;
+                    int row = (mouse_y - GRID_START_Y) / CELL_H;
 
                     if (plant_grid[row][col].type == 0) {
                         int cost = selected_plant == 1 ? 50 : 100;
