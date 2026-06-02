@@ -7,6 +7,15 @@
 #include "font.h"
 #include "entities.h"
 #include "rtc.h"
+#include <stdio.h>
+#include <string.h>
+
+// Global variables for wave system
+Wave level_waves[MAX_WAVES];
+int total_waves = 0;
+int current_wave = 0;
+int wave_timer = 0;
+int current_level = 1;
 
 // screen dimensions
 #define SCREEN_W 800
@@ -26,6 +35,12 @@ static GameState current_state = MAIN_MENU;
 #define CELL_SIZE 80
 #define GRID_START_X 40
 #define GRID_START_Y 150
+
+//Levels page constants
+#define SQ_SIZE 60
+#define SQ_GAP 20
+#define SQ_START_X 210
+#define SQ_START_Y 200
 
 // mouse state
 static int16_t mouse_x, mouse_y;
@@ -102,8 +117,184 @@ void game_init() {
     srand(current_time.seconds + current_time.minutes * 60);
 }
 
+void game_init_level(int level_number) {
+    current_level = level_number;
+
+    total_waves = 0;
+    current_wave = 0;
+    wave_timer = 5 * 60; // fallback initial delay
+
+    entities_init();
+    memset(plant_grid, 0, sizeof(plant_grid));
+
+    suns_count = 50;
+    score = 0;
+    suns_spent = 0;
+    frozen = false;
+    freeze_timer = 0;
+    selected_plant = 1;
+
+    char filepath[256];
+#ifdef LEVEL_PATH
+    snprintf(filepath, sizeof(filepath), LEVEL_PATH "/level%d.txt", level_number);
+#else
+    snprintf(filepath, sizeof(filepath), "../levels/level%d.txt", level_number);
+#endif
+
+    FILE *file = fopen(filepath, "r");
+    if (!file) {
+        printf("Warning: Could not open %s\n", filepath);
+        if (level_number == 1) {
+            wave_timer = 5 * 60;
+            total_waves = 2;
+            level_waves[0].num_zombies = 2;
+            level_waves[0].spawns[0].type = 1; level_waves[0].spawns[0].lane = 1;
+            level_waves[0].spawns[1].type = 1; level_waves[0].spawns[1].lane = 2;
+            level_waves[0].time_to_next_wave = 3 * 60;
+            level_waves[1].num_zombies = 1;
+            level_waves[1].spawns[0].type = 1; level_waves[1].spawns[0].lane = 2;
+            level_waves[1].time_to_next_wave = 3 * 60;
+        } else {
+            wave_timer = 5 * 60;
+            total_waves = 2;
+            level_waves[0].num_zombies = 2;
+            level_waves[0].spawns[0].type = 1; level_waves[0].spawns[0].lane = 1;
+            level_waves[0].spawns[1].type = 1; level_waves[0].spawns[1].lane = 3;
+            level_waves[0].time_to_next_wave = 5 * 60;
+            level_waves[1].num_zombies = 3;
+            level_waves[1].spawns[0].type = 1; level_waves[1].spawns[0].lane = 0;
+            level_waves[1].spawns[1].type = 1; level_waves[1].spawns[1].lane = 2;
+            level_waves[1].spawns[2].type = 1; level_waves[1].spawns[2].lane = 4;
+            level_waves[1].time_to_next_wave = 5 * 60;
+        }
+        return;
+    }
+    printf("Opened level file: %s\n", filepath);
+
+    char line[512];
+    int initial_delay = 5; // default if first line is missing/unparseable
+
+    // First non-empty line: time before first wave (seconds)
+    while (fgets(line, sizeof(line), file)) {
+        if (line[0] == '\n' || line[0] == '\r' || line[0] == '\0') continue;
+        sscanf(line, "%d", &initial_delay);
+        break;
+    }
+
+    // Remaining lines: one wave per line
+    // Format: num_zombies,(type,lane)(type,lane)...,time_to_next_wave
+    while (fgets(line, sizeof(line), file)) {
+        if (total_waves >= MAX_WAVES) break;
+        if (line[0] == '\n' || line[0] == '\r' || line[0] == '\0') continue;
+
+        Wave *w = &level_waves[total_waves];
+        char *ptr = line;
+
+        // A. Number of zombies
+        if (sscanf(ptr, "%d", &w->num_zombies) != 1) continue;
+        ptr = strchr(ptr, ',');
+        if (!ptr) continue;
+        ptr++;
+
+        if (w->num_zombies > MAX_ZOMBIES_PER_WAVE)
+            w->num_zombies = MAX_ZOMBIES_PER_WAVE;
+
+        // B. Zombie entries: (type,lane)(type,lane)...
+        for (int i = 0; i < w->num_zombies; i++) {
+            int offset = 0;
+            if (sscanf(ptr, "(%d,%d)%n",
+                       &w->spawns[i].type,
+                       &w->spawns[i].lane,
+                       &offset) == 2) {
+                ptr += offset;
+            }
+        }
+
+        // C. Time to next wave
+        while (*ptr == ',' || *ptr == ' ') ptr++;
+        int time_sec = 0;
+        if (sscanf(ptr, "%d", &time_sec) == 1) {
+            w->time_to_next_wave = time_sec * 60;
+        } else {
+            w->time_to_next_wave = 10 * 60;
+        }
+
+        printf("Loaded wave %d: %d zombies, next in %d ticks\n",
+               total_waves, w->num_zombies, w->time_to_next_wave);
+        total_waves++;
+    }
+
+    fclose(file);
+
+    // Set the initial delay AFTER parsing, so it is never overwritten
+    wave_timer = initial_delay * 60;
+
+    printf("Level %d loaded: %d waves, initial delay %d ticks\n",
+           level_number, total_waves, wave_timer);
+}
+
+void game_update_waves() {
+    if (total_waves == 0) return;
+
+    if (current_wave >= total_waves) {
+        // All waves dispatched. Count down the post-last-wave timer before
+        // allowing completion, so the last wave's zombies have time to appear.
+        if (wave_timer > 0) {
+            wave_timer--;
+        } else if (entities_zombies_alive() == 0) {
+            game_change_state(LEVEL_COMPLETE);
+        }
+        return;
+    }
+
+    if (wave_timer > 0) {
+        wave_timer--;
+        return; // Still counting down - don't spawn yet.
+    }
+
+    // wave_timer == 0: time to spawn this wave.
+    {
+        Wave *w = &level_waves[current_wave];
+        
+        // 1. Take a snapshot of which zombie slots are currently empty
+        bool was_empty[MAX_ZOMBIES];
+        for (int z = 0; z < MAX_ZOMBIES; z++) {
+            was_empty[z] = !zombies[z].active;
+        }
+
+        // 2. Spawn all zombies for this wave (they will temporarily overlap)
+        for (int i = 0; i < w->num_zombies; i++) {
+            uint8_t lane = (uint8_t)(w->spawns[i].lane);
+            if (lane >= GRID_ROWS) lane = GRID_ROWS - 1; // clamp to valid row
+            spawn_zombie(lane, current_level);
+        }
+        
+        // 3. Find the newly spawned zombies and apply an incremental X offset
+        int lane_offsets[5] = {0}; // Tracks how many zombies we've adjusted per lane
+        
+        for (int z = 0; z < MAX_ZOMBIES; z++) {
+            // If the slot was empty before, but is now active, it's a new spawn!
+            if (was_empty[z] && zombies[z].active) {
+                uint8_t lane = zombies[z].lane;
+                
+                // Push the zombie further to the right based on how many 
+                // others spawned in this lane before it.
+                // (e.g., 1st zombie gets +0, 2nd gets +50, 3rd gets +100)
+                zombies[z].x += lane_offsets[lane] * 50; 
+                
+                // Increment the offset multiplier for the next zombie in this lane
+                lane_offsets[lane]++; 
+            }
+        }
+        
+        wave_timer = w->time_to_next_wave;
+        current_wave++;
+    }
+}
+
 void game_update() {
     if (current_state == PLAYING) {
+        game_update_waves();
         if (frozen) {
             if (freeze_timer > 0) {
                 freeze_timer--;
@@ -111,32 +302,6 @@ void game_update() {
 
             if (freeze_timer == 0) {
                 frozen = false;
-            }
-        }
-
-        if (!wave_active && entities_zombies_alive() == 0) {
-            zombies_to_spawn = 3 + level * 2;
-            spawn_timer = 0;
-            wave_active = true;
-        }
-
-        if (wave_active && zombies_to_spawn > 0) {
-            spawn_timer++;
-
-            int interval = 780 - level * 150; 
-            
-            if (interval < 45) {
-                interval = 45;
-            }
-
-            if (spawn_timer >= (uint32_t) interval) {
-                spawn_timer = 0;
-                spawn_zombie(rand() % GRID_ROWS, level);
-                zombies_to_spawn--;
-
-                if (zombies_to_spawn == 0) {
-                    wave_active = false;
-                }
             }
         }
 
@@ -154,14 +319,6 @@ void game_update() {
             current_state = MAIN_MENU;
         }
 
-        if (!wave_active && entities_zombies_alive() == 0 && level > 0) {
-            if (level == 3) {
-                current_state = LEVEL_COMPLETE;
-            } else {
-                level++;
-            }
-        }
-
         rtc_timer++;
         if (rtc_timer >= 60) {
             rtc_read_date(&current_time);
@@ -173,6 +330,9 @@ void game_update() {
 void game_render() {
     if (current_state == MAIN_MENU) {
         menu_render(mouse_x, mouse_y);
+    }
+    else if (current_state == LEVEL_SELECT) {
+        level_select_render(mouse_x, mouse_y);
     }
     else if (current_state == PLAYING) {
         vg_clear(COLOR_BG);
@@ -300,8 +460,13 @@ bool game_should_quit() {
 void game_on_key(uint8_t scancode) {
     if (current_state == MAIN_MENU) {
         menu_on_key(scancode);
-
-    } else if (current_state == PLAYING) {
+    } 
+    else if (current_state == LEVEL_SELECT) {
+        if (scancode == 0x81) { 
+            current_state = MAIN_MENU;
+        }
+    }
+    else if (current_state == PLAYING) {
         if (scancode == ESC_BREAKCODE) {
             current_state = MAIN_MENU;
         }
@@ -341,7 +506,30 @@ void game_on_mouse(struct packet *pp) {
     if (current_state == MAIN_MENU) {
         menu_on_mouse(pp, mouse_x, mouse_y);
     } 
-        else if (current_state == PLAYING) {
+    else if (current_state == LEVEL_SELECT) {
+        static bool lvl_prev_lb = false;
+        if (pp->lb && !lvl_prev_lb) {
+            
+            // Loop through your 10 squares
+            for (int i = 0; i < 10; i++) {
+                int row = i / 5;
+                int col = i % 5;
+                int bx = SQ_START_X + col * (SQ_SIZE + SQ_GAP);
+                int by = SQ_START_Y + row * (SQ_SIZE + SQ_GAP);
+
+                if (mouse_x >= bx && mouse_x <= bx + SQ_SIZE &&
+                    mouse_y >= by && mouse_y <= by + SQ_SIZE) {
+                    
+                    // Call the parser instead of just assigning a variable!
+                    game_init_level(i + 1); 
+                    game_change_state(PLAYING);
+                    break;
+                }
+            }
+        }
+        lvl_prev_lb = pp->lb;
+    }
+    else if (current_state == PLAYING) {
         if (pp->lb && !prev_lb) {
             // try to collect sun first
             bool sun_collected = entities_collect_sun(mouse_x, mouse_y, &suns_count);
@@ -374,4 +562,36 @@ void game_on_mouse(struct packet *pp) {
     }
 
     prev_lb = pp->lb;
+}
+
+void level_select_render(int mouse_x, int mouse_y) {
+    vg_clear(0x111111);
+
+    font_draw_string("SELECT A LEVEL", 310, 100, 0xFFFFFF);
+
+    // Draw 10 squares arranged into 2 rows of 5
+    for (int i = 0; i < 10; i++) {
+        int row = i / 5;
+        int col = i % 5;
+        int bx = SQ_START_X + col * (SQ_SIZE + SQ_GAP);
+        int by = SQ_START_Y + row * (SQ_SIZE + SQ_GAP);
+
+        uint32_t color = 0x444444; 
+        if (mouse_x >= bx && mouse_x <= bx + SQ_SIZE &&
+            mouse_y >= by && mouse_y <= by + SQ_SIZE) {
+            color = 0x0088FF; 
+        }
+
+        vg_draw_rectangle(bx, by, SQ_SIZE, SQ_SIZE, color);
+        
+        int text_offset_x = (i == 9) ? 19 : 25; 
+        font_draw_number(i + 1, bx + text_offset_x, by + 22, 0xFFFFFF);
+    }
+
+    uint32_t back_color = 0x555555;
+    if (mouse_x >= 300 && mouse_x <= 500 && mouse_y >= 410 && mouse_y <= 460) {
+        back_color = 0x888888;
+    }
+    vg_draw_rectangle(300, 410, 200, 50, back_color);
+    font_draw_string("BACK", 376, 426, 0xFFFFFF);
 }
