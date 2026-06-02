@@ -407,13 +407,16 @@ void entities_render(int grid_x, int grid_y, int cell_h, bool frozen) {
     // suns
 
     for (int i = 0; i < MAX_SUNS; i++) {
-
+        
         if (!suns_array[i].active) continue;
 
-        vg_draw_rectangle(suns_array[i].x - 12, suns_array[i].y - 12, 24, 24, COL_SUN);
-
-        vg_draw_rectangle(suns_array[i].x - 8, suns_array[i].y - 8, 16, 16, COL_SUNCORE);
-
+        if (sun_pixmap != NULL) {
+            // calcula o canto superior esquerdo para o sol ficar centrado
+            int draw_x = suns_array[i].x - (sun_img.width / 2);
+            int draw_y = suns_array[i].y - (sun_img.height / 2);
+            
+            vg_draw_xpm(sun_img, sun_pixmap, draw_x, draw_y);
+        }
     }
 
 }

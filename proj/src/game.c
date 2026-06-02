@@ -7,6 +7,14 @@
 #include "font.h"
 #include "entities.h"
 #include "rtc.h"
+#include "sprites/sunflower.xpm"
+#include "sprites/sun.xpm"
+
+xpm_image_t sunflower_img;
+uint8_t *sunflower_pixmap = NULL;
+
+xpm_image_t sun_img;
+uint8_t *sun_pixmap = NULL;
 
 // screen dimensions
 #define SCREEN_W 800
@@ -95,6 +103,16 @@ void game_init() {
             plant_grid[r][c].shoot_timer = 0;
             plant_grid[r][c].sun_timer = 0;
         }
+    }
+
+    sunflower_pixmap = xpm_load((xpm_map_t) sunflower_xpm, XPM_8_8_8_8, &sunflower_img);
+    if (sunflower_pixmap == NULL) {
+        printf("Erro ao carregar o XPM do sunflower!\n");
+    }
+
+    sun_pixmap = xpm_load((xpm_map_t) sun_xpm, XPM_8_8_8_8, &sun_img);
+    if (sun_pixmap == NULL) {
+        printf("Erro ao carregar o XPM do sun!\n");
     }
 
     rtc_read_date(&current_time);
@@ -204,8 +222,12 @@ void game_render() {
 
                 if (plant_grid[r][c].type == 1) {
                     // sunflower
-                    vg_draw_rectangle(cell_x + 20, cell_y + 15, 40, 40, 0xFFFF00);
-                    vg_draw_rectangle(cell_x + 28, cell_y + 23, 24, 24, 0x8B4513);
+                    if (sunflower_pixmap != NULL) {
+                        int center_x = cell_x + (CELL_SIZE - sunflower_img.width) / 2;
+                        int center_y = cell_y + (CELL_SIZE - sunflower_img.height) / 2;
+                        
+                        vg_draw_xpm(sunflower_img, sunflower_pixmap, center_x, center_y);
+                    }
                 }
                 else if (plant_grid[r][c].type == 2) {
                     // peashooter

@@ -3,6 +3,13 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <lcom/lcf.h>
+
+extern xpm_image_t sunflower_img;
+extern uint8_t *sunflower_pixmap;
+
+extern xpm_image_t sun_img;
+extern uint8_t *sun_pixmap;
 
 // max counts
 #define MAX_ZOMBIES      20
