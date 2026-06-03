@@ -7,6 +7,7 @@
 #include "font.h"
 #include "entities.h"
 #include "rtc.h"
+#include "levels.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -176,119 +177,43 @@ void game_init() {
 }
 
 void game_init_level(int level_number) {
-    current_level = level_number;
 
-    total_waves = 0;
-    current_wave = 0;
-    wave_timer = 5 * 60; // fallback initial delay
-
-    entities_init();
+    //Resetting board state and entities
+    entities_init(); 
     memset(plant_grid, 0, sizeof(plant_grid));
-
-    suns_count = 50;
+    suns_count = 150; 
     score = 0;
     suns_spent = 0;
+    selected_plant = 1;
     frozen = false;
     freeze_timer = 0;
-    selected_plant = 1;
 
-    char filepath[256];
-#ifdef LEVEL_PATH
-    snprintf(filepath, sizeof(filepath), LEVEL_PATH "/level%d.txt", level_number);
-#else
-    snprintf(filepath, sizeof(filepath), "../levels/level%d.txt", level_number);
-#endif
-
-    FILE *file = fopen(filepath, "r");
-    if (!file) {
-        printf("Warning: Could not open %s\n", filepath);
-        if (level_number == 1) {
-            wave_timer = 5 * 60;
-            total_waves = 2;
-            level_waves[0].num_zombies = 2;
-            level_waves[0].spawns[0].type = 1; level_waves[0].spawns[0].lane = 1;
-            level_waves[0].spawns[1].type = 1; level_waves[0].spawns[1].lane = 2;
-            level_waves[0].time_to_next_wave = 3 * 60;
-            level_waves[1].num_zombies = 1;
-            level_waves[1].spawns[0].type = 1; level_waves[1].spawns[0].lane = 2;
-            level_waves[1].time_to_next_wave = 3 * 60;
-        } else {
-            wave_timer = 5 * 60;
-            total_waves = 2;
-            level_waves[0].num_zombies = 2;
-            level_waves[0].spawns[0].type = 1; level_waves[0].spawns[0].lane = 1;
-            level_waves[0].spawns[1].type = 1; level_waves[0].spawns[1].lane = 3;
-            level_waves[0].time_to_next_wave = 5 * 60;
-            level_waves[1].num_zombies = 3;
-            level_waves[1].spawns[0].type = 1; level_waves[1].spawns[0].lane = 0;
-            level_waves[1].spawns[1].type = 1; level_waves[1].spawns[1].lane = 2;
-            level_waves[1].spawns[2].type = 1; level_waves[1].spawns[2].lane = 4;
-            level_waves[1].time_to_next_wave = 5 * 60;
-        }
-        return;
+    current_level = level_number;
+    
+    // Safety check bounds
+    if (level_number < 1 || level_number > (int)(sizeof(ALL_LEVELS) / sizeof(LevelConfig))) {
+        level_number = 1;
     }
-    printf("Opened level file: %s\n", filepath);
+    
+    LevelConfig config = ALL_LEVELS[level_number - 1];
 
-    char line[512];
-    int initial_delay = 5; // default if first line is missing/unparseable
+    total_waves = config.total_waves;
+    current_wave = 0;
+    
+    wave_timer = config.initial_delay * 60; 
 
-    // First non-empty line: time before first wave (seconds)
-    while (fgets(line, sizeof(line), file)) {
-        if (line[0] == '\n' || line[0] == '\r' || line[0] == '\0') continue;
-        sscanf(line, "%d", &initial_delay);
-        break;
+    // Copy wave configurations to  level_waves array
+    for (int i = 0; i < total_waves; i++) {
+        level_waves[i].num_zombies = config.waves[i].num_zombies;
+        level_waves[i].time_to_next_wave = config.waves[i].time_to_next_wave * 60;
+        
+        for (int j = 0; j < config.waves[i].num_zombies; j++) {
+            level_waves[i].spawns[j].type = config.waves[i].spawns[j].type;
+            level_waves[i].spawns[j].lane = config.waves[i].spawns[j].lane;
+        }
     }
 
-    // Remaining lines: one wave per line
-    // Format: num_zombies,(type,lane)(type,lane)...,time_to_next_wave
-    while (fgets(line, sizeof(line), file)) {
-        if (total_waves >= MAX_WAVES) break;
-        if (line[0] == '\n' || line[0] == '\r' || line[0] == '\0') continue;
-
-        Wave *w = &level_waves[total_waves];
-        char *ptr = line;
-
-        // A. Number of zombies
-        if (sscanf(ptr, "%d", &w->num_zombies) != 1) continue;
-        ptr = strchr(ptr, ',');
-        if (!ptr) continue;
-        ptr++;
-
-        if (w->num_zombies > MAX_ZOMBIES_PER_WAVE)
-            w->num_zombies = MAX_ZOMBIES_PER_WAVE;
-
-        // B. Zombie entries: (type,lane)(type,lane)...
-        for (int i = 0; i < w->num_zombies; i++) {
-            int offset = 0;
-            if (sscanf(ptr, "(%d,%d)%n",
-                       &w->spawns[i].type,
-                       &w->spawns[i].lane,
-                       &offset) == 2) {
-                ptr += offset;
-            }
-        }
-
-        // C. Time to next wave
-        while (*ptr == ',' || *ptr == ' ') ptr++;
-        int time_sec = 0;
-        if (sscanf(ptr, "%d", &time_sec) == 1) {
-            w->time_to_next_wave = time_sec * 60;
-        } else {
-            w->time_to_next_wave = 10 * 60;
-        }
-
-        printf("Loaded wave %d: %d zombies, next in %d ticks\n",
-               total_waves, w->num_zombies, w->time_to_next_wave);
-        total_waves++;
-    }
-
-    fclose(file);
-
-    // Set the initial delay AFTER parsing, so it is never overwritten
-    wave_timer = initial_delay * 60;
-
-    printf("Level %d loaded: %d waves, initial delay %d ticks\n",
-           level_number, total_waves, wave_timer);
+    printf("Level %d loaded: %d waves, initial delay %d ticks\n", level_number, total_waves, wave_timer);
 }
 
 void game_update_waves() {

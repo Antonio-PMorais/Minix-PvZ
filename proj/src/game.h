@@ -12,25 +12,6 @@ typedef enum {
     LEVEL_SELECT
 } GameState;
 
-#define MAX_WAVES 50
-#define MAX_ZOMBIES_PER_WAVE 50
-
-typedef struct {
-    int type; 
-    int lane;
-} ZombieSpawn;
-
-typedef struct {
-    int num_zombies;
-    ZombieSpawn spawns[MAX_ZOMBIES_PER_WAVE];
-    int time_to_next_wave; // Stored in ticks (seconds * 60)
-} Wave;
-
-extern Wave level_waves[MAX_WAVES];
-extern int total_waves;
-extern int current_wave;
-extern int wave_timer;
-
 void game_init();
 void game_init_level(int level_number);
 void game_update_waves();
