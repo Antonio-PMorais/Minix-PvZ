@@ -92,7 +92,7 @@ void name_input_render() {
     }
 
     // blinking cursor 
-    int cursor_x = 220 + name_len * 8;
+    int cursor_x = 220 + name_len * 12;
     vg_draw_rectangle(cursor_x, 265, 2, 20, 0xFFFFFF);
 
     // instructions 
