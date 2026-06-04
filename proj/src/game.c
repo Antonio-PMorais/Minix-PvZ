@@ -8,6 +8,7 @@
 #include "entities.h"
 #include "rtc.h"
 #include "levels.h"
+#include "name_input.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -118,6 +119,7 @@ void game_init() {
     }
 
     entities_init();
+    name_input_init();
 
     suns_count = 150;
     score = 0;
@@ -189,7 +191,9 @@ void game_init_level(int level_number) {
     freeze_timer = 0;
 
     current_level = level_number;
-    
+    level = level_number; // for levels
+   
+
     // Safety check bounds
     if (level_number < 1 || level_number > (int)(sizeof(ALL_LEVELS) / sizeof(LevelConfig))) {
         level_number = 1;
@@ -314,6 +318,9 @@ void game_render() {
     if (current_state == MAIN_MENU) {
         menu_render(mouse_x, mouse_y);
     }
+    else if (current_state == NAME_INPUT) {
+        name_input_render();
+    }
     else if (current_state == LEVEL_SELECT) {
         level_select_render(mouse_x, mouse_y);
     }
@@ -366,7 +373,12 @@ void game_render() {
         font_draw_number(score, 280, 15, 0xFFFFFF);
 
         font_draw_string("LVL:", 400, 15, 0xFFFFFF);
-        font_draw_number(level, 450, 15, 0xFFFFFF);
+        font_draw_number(current_level, 450, 15, 0xFFFFFF);
+
+        const char *player_name = name_input_get_name();
+        if (player_name[0] != '\0') {
+            font_draw_string(player_name, 500, 40, 0xCCCCCC);
+        }
 
         //draw plant options
         uint32_t sun_color = (selected_plant == 1) ? 0xFFFF00 : 0x888888;
@@ -430,6 +442,17 @@ void game_on_key(uint8_t scancode) {
     if (current_state == MAIN_MENU) {
         menu_on_key(scancode);
     } 
+
+    else if (current_state == NAME_INPUT) {
+        if (name_input_on_key(scancode)) {
+            game_change_state(LEVEL_SELECT);
+        }
+
+        if (scancode == ESC_BREAKCODE) {
+            game_change_state(MAIN_MENU);
+        }
+    }
+
     else if (current_state == LEVEL_SELECT) {
         if (scancode == 0x81) { 
             current_state = MAIN_MENU;
@@ -462,8 +485,8 @@ void game_on_key(uint8_t scancode) {
 
 void game_on_mouse(struct packet *pp) {
     // update mouse
-    mouse_x += pp->delta_x;
-    mouse_y -= pp->delta_y;
+    mouse_x += pp->delta_x;  
+    mouse_y -= pp->delta_y; 
 
     // mouse limits
     if (mouse_x < 0) mouse_x = 0;
