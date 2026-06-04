@@ -48,7 +48,7 @@ void test_privileged_operation() {
 }
 
 void test_rtc_date() {
-  rtc_date date = {0, 0, 0};
+  rtc_date date = {0, 0, 0, 0, 0, 0};
   rtc_read_date(&date);
 
   struct timespec ts;
