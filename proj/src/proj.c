@@ -37,12 +37,12 @@ int system_init() {
         return 1;
     }
 
-    if (mouse_subscribe_int(&mouse_bit_no) != 0) {
-        printf("Error: Failed to subscribe Mouse interrupts.\n");
-        return 1;
-    }
     if (mouse_enable_data_report() != 0) {
         printf("Error: Failed to enable Mouse data reporting.\n");
+        return 1;
+    }
+    if (mouse_subscribe_int(&mouse_bit_no) != 0) {
+        printf("Error: Failed to subscribe Mouse interrupts.\n");
         return 1;
     }
 
@@ -62,13 +62,13 @@ int system_init() {
 int system_cleanup() {
     int errors = 0;
 
-    if (mouse_disable_data_report() != 0) {
-        printf("Error: Failed to disable Mouse data reporting.\n");
-        errors = 1;
-    }
-
+    
     if (mouse_unsubscribe_int() != 0) {
         printf("Error: Failed to unsubscribe Mouse.\n");
+        errors = 1;
+    }
+    if (mouse_disable_data_report() != 0) {
+        printf("Error: Failed to disable Mouse data reporting.\n");
         errors = 1;
     }
 

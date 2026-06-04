@@ -1,6 +1,6 @@
 #include <lcom/lcf.h>
 #include "mouse.h"
-#include "lab4/i8042.h"
+#include "i8042.h"
 
 
 static int mouse_hook_id = 12; 
@@ -73,4 +73,13 @@ void mouse_parse_packet(struct packet *pp, uint8_t bytes[]) {
   pp->delta_y = (bytes[0] & BIT(5)) ? (0xFF00 | bytes[2]) : bytes[2];
   pp->x_ov = bytes[0] & BIT(6);
   pp->y_ov = bytes[0] & BIT(7);
+}
+
+
+int (mouse_enable_data_report)() {
+  return mouse_write_cmd(0xF4);
+}
+
+int (mouse_disable_data_report)() {
+  return mouse_write_cmd(0xF5);
 }
