@@ -1,6 +1,7 @@
 #include "hud.h"
 #include "font.h"
 #include "v_card.h"
+#include "game_state.h"
 
 void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_frozen, rtc_date *time) {
     // top bar
@@ -44,10 +45,19 @@ void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_froze
 }
 
 void ui_render_level_complete(int suns_spent) {
-    font_draw_string("LEVEL COMPLETE!", 300, 250, 0xFF0000);
-    
-    font_draw_string("SUNS SPENT:", 300, 300, 0xFF0000);
-    font_draw_number(suns_spent, 450, 300, 0xFF0000);
 
-    font_draw_string("PRESS ESC TO RETURN", 250, 400, 0xFF0000);
+    vg_draw_rectangle(220, 200, 360, 260, 0x111111);
+
+    font_draw_string("LEVEL COMPLETE!", 310, 230, 0xFFFFFF);
+    
+    font_draw_string("SUNS SPENT:", 304, 280, 0xFFFFFF);
+    font_draw_number(suns_spent, 448, 280, 0xFFFFFF);
+
+    font_draw_string("PRESS ESC TO RETURN", 286, 340, 0xFFFFFF);
+    if(current_level < 10){
+        font_draw_string("PRESS ENTER FOR NEXT LEVEL", 256, 390, 0x00FF00);
+    }
+    else{
+        font_draw_string("YOU COMPLETED THE GAME!! THX FOR PLAYING :)", 292, 420, 0x00FF00);
+    }
 }
