@@ -263,7 +263,7 @@ void game_on_mouse(struct packet *pp) {
                     mouse_y >= by && mouse_y <= by + SQ_SIZE) {
                     
                     game_init_level(i + 1); 
-                    game_change_state(PLAYING);
+                    game_change_state(NAME_INPUT);
                     break;
                 }
             }
