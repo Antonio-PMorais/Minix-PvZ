@@ -2,6 +2,7 @@
 #include "v_card.h"
 #include "game.h"
 #include "font.h"
+#include "name_input.h"
 
 //button coordinates
 #define BTN_W 200
@@ -59,8 +60,11 @@ void menu_on_mouse(struct packet *pp, int mouse_x, int mouse_y) {
         if (mouse_x >= BTN_PLAY_X && mouse_x <= BTN_PLAY_X + BTN_W && 
             mouse_y >= BTN_PLAY_Y && mouse_y <= BTN_PLAY_Y + BTN_H) {
 
-            game_init_level(1);
-            game_change_state(PLAYING);
+           // game_init_level(1);
+            //game_change_state(PLAYING);
+
+            name_input_init();
+            game_change_state(NAME_INPUT);
         }
 
         if (mouse_x >= BTN_LEVELS_X && mouse_x <= BTN_LEVELS_X + BTN_W && 

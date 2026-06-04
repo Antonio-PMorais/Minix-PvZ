@@ -7,6 +7,7 @@
 
 typedef enum {
     MAIN_MENU,
+    NAME_INPUT,
     PLAYING,
     LEVEL_COMPLETE,
     LEVEL_SELECT
