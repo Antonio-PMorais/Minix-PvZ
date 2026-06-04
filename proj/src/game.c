@@ -17,6 +17,7 @@
 #include "sun.h"
 #include "projectile.h"
 #include "wave_manager.h"
+#include "name_input.h"
 
 int suns_count = 150;
 int score = 0;
@@ -64,6 +65,8 @@ void game_init() {
     mouse_x = SCREEN_W / 2;
     mouse_y = SCREEN_H / 2;
 
+    name_input_init(); // Kept from incoming branch
+
     suns_count = 150;
     score = 0;
     current_level = 1;
@@ -102,6 +105,7 @@ void game_init_level(int level_number) {
 
     current_level = level_number;
     
+    // Using the modularized wave manager from HEAD
     wave_manager_init(level_number);
 }
 
@@ -141,6 +145,9 @@ void game_render() {
     if (current_state == MAIN_MENU) {
         menu_render(mouse_x, mouse_y);
     }
+    else if (current_state == NAME_INPUT) {
+        name_input_render();
+    }
     else if (current_state == LEVEL_SELECT) {
         level_select_render(mouse_x, mouse_y);
     }
@@ -155,7 +162,14 @@ void game_render() {
         projectiles_render();
         suns_render();
 
+        // Render modular UI from HEAD
         ui_render_hud(suns_count, score, current_level, selected_plant, frozen, &current_time);
+
+        // Render player name from incoming branch
+        const char *player_name = name_input_get_name();
+        if (player_name[0] != '\0') {
+            font_draw_string(player_name, 500, 40, 0xCCCCCC);
+        }
     }
     else if (current_state == LEVEL_COMPLETE) {
         vg_clear(COLOR_BG);
@@ -177,6 +191,17 @@ void game_on_key(uint8_t scancode) {
     if (current_state == MAIN_MENU) {
         menu_on_key(scancode);
     } 
+
+    else if (current_state == NAME_INPUT) {
+        if (name_input_on_key(scancode)) {
+            game_change_state(LEVEL_SELECT);
+        }
+
+        if (scancode == ESC_BREAKCODE) {
+            game_change_state(MAIN_MENU);
+        }
+    }
+
     else if (current_state == LEVEL_SELECT) {
         if (scancode == ESC_BREAKCODE) { 
             current_state = MAIN_MENU;
