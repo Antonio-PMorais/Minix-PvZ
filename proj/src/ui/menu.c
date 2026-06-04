@@ -23,6 +23,8 @@ void menu_init() {
 void menu_render(int mouse_x, int mouse_y) {
     vg_clear(0x111111);
 
+    font_draw_string("MINIX PVZ", 346, 80, 0xEEEEEE);
+
     uint32_t play_color = 0x005500;
     uint32_t levels_color = 0x555500;
     uint32_t exit_color = 0x550000;
@@ -85,4 +87,35 @@ void menu_on_key(uint8_t scancode) {
     if (scancode == 0x81) {
         game_set_quit();
     }
+}
+
+void level_select_render(int mouse_x, int mouse_y) {
+    vg_clear(0x111111);
+
+    font_draw_string("SELECT A LEVEL", 310, 100, 0xFFFFFF);
+
+    for (int i = 0; i < 10; i++) {
+        int row = i / 5;
+        int col = i % 5;
+        int bx = SQ_START_X + col * (SQ_SIZE + SQ_GAP);
+        int by = SQ_START_Y + row * (SQ_SIZE + SQ_GAP);
+
+        uint32_t color = 0x444444; 
+        if (mouse_x >= bx && mouse_x <= bx + SQ_SIZE &&
+            mouse_y >= by && mouse_y <= by + SQ_SIZE) {
+            color = 0x0088FF; 
+        }
+
+        vg_draw_rectangle(bx, by, SQ_SIZE, SQ_SIZE, color);
+        
+        int text_offset_x = (i == 9) ? 19 : 25; 
+        font_draw_number(i + 1, bx + text_offset_x, by + 22, 0xFFFFFF);
+    }
+
+    uint32_t back_color = 0x555555;
+    if (mouse_x >= 300 && mouse_x <= 500 && mouse_y >= 410 && mouse_y <= 460) {
+        back_color = 0x888888;
+    }
+    vg_draw_rectangle(300, 410, 200, 50, back_color);
+    font_draw_string("BACK", 376, 426, 0xFFFFFF);
 }

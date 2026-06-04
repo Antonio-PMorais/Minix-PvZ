@@ -32,11 +32,6 @@ bool frozen = false;
 
 static GameState current_state = MAIN_MENU;
 
-#define SQ_SIZE 60
-#define SQ_GAP 20
-#define SQ_START_X 210
-#define SQ_START_Y 200
-
 // mouse state
 static int16_t mouse_x, mouse_y;
 static bool prev_lb = false; 
@@ -130,7 +125,7 @@ void game_update() {
 
         if (game_over) {
             rtc_read_date(&current_time);
-            current_state = MAIN_MENU;
+            current_state = GAME_OVER;
         }
 
         rtc_timer++;
@@ -174,7 +169,14 @@ void game_render() {
     else if (current_state == LEVEL_COMPLETE) {
         vg_clear(COLOR_BG);
         background_render();
+        ui_render_hud(suns_count, score, current_level, selected_plant, frozen, &current_time);
         ui_render_level_complete(suns_spent);
+    }
+    else if (current_state == GAME_OVER) {
+        vg_clear(COLOR_BG);
+        background_render();
+        ui_render_hud(suns_count, score, current_level, selected_plant, frozen, &current_time);
+        ui_render_game_over(suns_spent);
     }
 
     vg_draw_rectangle(mouse_x - CURSOR_SIZE / 2, mouse_y - 1, CURSOR_SIZE, 2, COLOR_CURSOR);
@@ -224,6 +226,15 @@ void game_on_key(uint8_t scancode) {
         if (scancode == ESC_BREAKCODE) {
             current_state = MAIN_MENU;
         }
+
+        if (scancode == 0x1C && current_level < 10) { 
+            game_init_level(current_level + 1);
+            game_change_state(PLAYING);
+        }
+    } else if (current_state == GAME_OVER) {
+        if (scancode == ESC_BREAKCODE) {
+            current_state = MAIN_MENU;
+        }
     }
 }
 
@@ -252,7 +263,7 @@ void game_on_mouse(struct packet *pp) {
                     mouse_y >= by && mouse_y <= by + SQ_SIZE) {
                     
                     game_init_level(i + 1); 
-                    game_change_state(PLAYING);
+                    game_change_state(NAME_INPUT);
                     break;
                 }
             }
@@ -291,35 +302,4 @@ void game_on_mouse(struct packet *pp) {
     }
 
     prev_lb = pp->lb;
-}
-
-void level_select_render(int mouse_x, int mouse_y) {
-    vg_clear(0x111111);
-
-    font_draw_string("SELECT A LEVEL", 310, 100, 0xFFFFFF);
-
-    for (int i = 0; i < 10; i++) {
-        int row = i / 5;
-        int col = i % 5;
-        int bx = SQ_START_X + col * (SQ_SIZE + SQ_GAP);
-        int by = SQ_START_Y + row * (SQ_SIZE + SQ_GAP);
-
-        uint32_t color = 0x444444; 
-        if (mouse_x >= bx && mouse_x <= bx + SQ_SIZE &&
-            mouse_y >= by && mouse_y <= by + SQ_SIZE) {
-            color = 0x0088FF; 
-        }
-
-        vg_draw_rectangle(bx, by, SQ_SIZE, SQ_SIZE, color);
-        
-        int text_offset_x = (i == 9) ? 19 : 25; 
-        font_draw_number(i + 1, bx + text_offset_x, by + 22, 0xFFFFFF);
-    }
-
-    uint32_t back_color = 0x555555;
-    if (mouse_x >= 300 && mouse_x <= 500 && mouse_y >= 410 && mouse_y <= 460) {
-        back_color = 0x888888;
-    }
-    vg_draw_rectangle(300, 410, 200, 50, back_color);
-    font_draw_string("BACK", 376, 426, 0xFFFFFF);
 }

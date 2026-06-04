@@ -5,6 +5,11 @@
 #include <stdbool.h>
 #include <lcom/lcf.h>
 
+#define SQ_SIZE 60
+#define SQ_GAP 20
+#define SQ_START_X 210
+#define SQ_START_Y 200
+
 void menu_init();
 void menu_render(int mouse_x, int mouse_y);
 void menu_on_mouse(struct packet *pp, int mouse_x, int mouse_y);
