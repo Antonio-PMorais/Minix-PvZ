@@ -28,4 +28,3 @@ void game_set_quit();
 void level_select_render(int mouse_x, int mouse_y);
 
 #endif
-

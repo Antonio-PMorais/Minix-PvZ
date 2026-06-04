@@ -30,7 +30,7 @@ static const LevelConfig ALL_LEVELS[] = {
         .initial_delay = 15, 
         .total_waves = 2,
         .waves = {
-            { .num_zombies = 2, .spawns = {{1, 1}, {1, 2}}, .time_to_next_wave = 5 },
+            { .num_zombies = 2, .spawns = {{1, 1}, {1, 2}}, .time_to_next_wave = 10 },
             
             { .num_zombies = 1, .spawns = {{1, 2}}, .time_to_next_wave = 3 }
         }
