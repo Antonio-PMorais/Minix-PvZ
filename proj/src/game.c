@@ -5,67 +5,33 @@
 #include "proj.h"
 #include <stdlib.h>
 #include "font.h"
-#include "entities.h"
 #include "rtc.h"
 #include "levels.h"
+#include "game_state.h"
+#include "board.h"
+#include "background.h"
+#include "hud.h"
+#include "sunflower.h"
+#include "peashooter.h"
+#include "zombie.h"
+#include "sun.h"
+#include "projectile.h"
+#include "wave_manager.h"
 #include "name_input.h"
 
-#include <stdio.h>
-#include <string.h>
-
-// Global variables for wave system
-Wave level_waves[MAX_WAVES];
-int total_waves = 0;
-int current_wave = 0;
-int wave_timer = 0;
+int suns_count = 150;
+int score = 0;
 int current_level = 1;
+bool frozen = false;
 
-#include "sprites/sunflower.xpm"
-#include "sprites/sun.xpm"
-#include "sprites/peashooter.xpm"
-#include "sprites/grass_grid.xpm"
-#include "sprites/peashooter_projectile.xpm"
-#include "sprites/zombie_default.xpm"
-
-xpm_image_t sunflower_img;
-uint8_t *sunflower_pixmap = NULL;
-
-xpm_image_t sun_img;
-uint8_t *sun_pixmap = NULL;
-
-xpm_image_t peashooter_img;
-uint8_t *peashooter_pixmap = NULL;
-
-xpm_image_t grass_grid_img;
-uint8_t *grass_grid_pixmap = NULL;
-
-xpm_image_t peashooter_projectile_img;
-uint8_t *peashooter_projectile_pixmap = NULL;
-
-xpm_image_t zombie_default_img;
-uint8_t *zombie_default_pixmap = NULL;
-
-// screen dimensions
 #define SCREEN_W 800
 #define SCREEN_H 600
 
-
 #define COLOR_BG      0x228B22
-#define COLOR_UI      0x3b4d24
-#define COLOR_CELL    0x32CD32
-#define COLOR_PLANT   0x00FF00
 #define COLOR_CURSOR  0xFFFFFF
 
 static GameState current_state = MAIN_MENU;
 
-#define GRID_COLS 9
-#define GRID_ROWS 5
-#define CELL_W 89
-#define CELL_H 100
-#define GRID_START_X 0
-#define GRID_START_Y 100
-
-//Levels page constants
 #define SQ_SIZE 60
 #define SQ_GAP 20
 #define SQ_START_X 210
@@ -73,32 +39,19 @@ static GameState current_state = MAIN_MENU;
 
 // mouse state
 static int16_t mouse_x, mouse_y;
-static bool prev_lb = false; // store if left btn was pressed in last frame
+static bool prev_lb = false; 
 #define CURSOR_SIZE 8
-
-static int grid[GRID_ROWS][GRID_COLS];
 
 static bool quit = false;
 
-// game entities and state
-static plant_cell_t plant_grid[5][9];
-static int suns_count = 150;
-static int score = 0;
-static int level = 1;
-static int selected_plant = 1;  // 1=sunflower, 2=peashooter
-static bool frozen = false;
+// game local state
+static int selected_plant = 1;
 static uint32_t freeze_timer = 0;
 static int suns_spent = 0;
-
-// wave spawning
-static int zombies_to_spawn = 0;
-static uint32_t spawn_timer = 0;
-static bool wave_active = false;
 
 // RTC
 static uint32_t rtc_timer = 0;
 static rtc_date current_time;
-#define ESC_BREAKCODE 0x81
 
 void game_change_state(GameState new_state) {
     current_state = new_state;
@@ -112,77 +65,37 @@ void game_init() {
     mouse_x = SCREEN_W / 2;
     mouse_y = SCREEN_H / 2;
 
-    for (int r = 0; r < GRID_ROWS; r++) {
-        for (int c = 0; c < GRID_COLS; c++) {
-            grid[r][c] = 0;
-        }
-    }
-
-    entities_init();
-    name_input_init();
+    name_input_init(); // Kept from incoming branch
 
     suns_count = 150;
     score = 0;
-    level = 1;
+    current_level = 1;
     selected_plant = 1;
     frozen = false;
     freeze_timer = 0;
-    zombies_to_spawn = 0;
-    spawn_timer = 0;
-    wave_active = false;
     rtc_timer = 0;
     suns_spent = 0;
 
-    for (int r = 0; r < GRID_ROWS; r++) {
-        for (int c = 0; c < GRID_COLS; c++) {
-            plant_grid[r][c].type = 0;
-            plant_grid[r][c].hp = 0;
-            plant_grid[r][c].shoot_timer = 0;
-            plant_grid[r][c].sun_timer = 0;
-        }
-    }
-
-    // load sprites pixelmaps
-    sunflower_pixmap = xpm_load((xpm_map_t) sunflower_xpm, XPM_8_8_8_8, &sunflower_img);
-    if (sunflower_pixmap == NULL) {
-        printf("Error in loading sunflower xpm\n");
-    }
-
-    sun_pixmap = xpm_load((xpm_map_t) sun_xpm, XPM_8_8_8_8, &sun_img);
-    if (sun_pixmap == NULL) {
-        printf("Error in loading sun xpm.\n");
-    }
-
-    peashooter_pixmap = xpm_load((xpm_map_t) peashooter_xpm, XPM_8_8_8_8, &peashooter_img);
-    if (peashooter_pixmap == NULL) {
-        printf("Error in loading peashooter xpm.\n");
-    }
-
-    grass_grid_pixmap = xpm_load((xpm_map_t) grass_grid_xpm, XPM_8_8_8_8, &grass_grid_img);
-    if (grass_grid_pixmap == NULL) {
-        printf("Error in loading background xpm.\n");
-    }
-
-    peashooter_projectile_pixmap = xpm_load((xpm_map_t) peashooter_projectile_xpm, XPM_8_8_8_8, &peashooter_projectile_img);
-    if (peashooter_projectile_pixmap == NULL) {
-        printf("Error on loading peashooter projectile xpm.\n");
-    }
-
-    zombie_default_pixmap = xpm_load((xpm_map_t) zombie_default_xpm, XPM_8_8_8_8, &zombie_default_img);
-    if (zombie_default_pixmap == NULL) {
-        printf("Error on loading zombie default xpm.\n");
-    }
+    background_init();
+    board_init();
+    sunflowers_init();
+    peashooters_init();
+    zombies_init();
+    projectiles_init();
+    suns_init();
 
     rtc_read_date(&current_time);
-
     srand(current_time.seconds + current_time.minutes * 60);
 }
 
 void game_init_level(int level_number) {
+    board_init();
+    sunflowers_init();
+    peashooters_init();
+    zombies_init();
+    projectiles_init();
+    suns_init();
 
-    //Resetting board state and entities
-    entities_init(); 
-    memset(plant_grid, 0, sizeof(plant_grid));
     suns_count = 150; 
     score = 0;
     suns_spent = 0;
@@ -191,115 +104,29 @@ void game_init_level(int level_number) {
     freeze_timer = 0;
 
     current_level = level_number;
-    level = level_number; // for levels
-   
-
-    // Safety check bounds
-    if (level_number < 1 || level_number > (int)(sizeof(ALL_LEVELS) / sizeof(LevelConfig))) {
-        level_number = 1;
-    }
     
-    LevelConfig config = ALL_LEVELS[level_number - 1];
-
-    total_waves = config.total_waves;
-    current_wave = 0;
-    
-    wave_timer = config.initial_delay * 60; 
-
-    // Copy wave configurations to  level_waves array
-    for (int i = 0; i < total_waves; i++) {
-        level_waves[i].num_zombies = config.waves[i].num_zombies;
-        level_waves[i].time_to_next_wave = config.waves[i].time_to_next_wave * 60;
-        
-        for (int j = 0; j < config.waves[i].num_zombies; j++) {
-            level_waves[i].spawns[j].type = config.waves[i].spawns[j].type;
-            level_waves[i].spawns[j].lane = config.waves[i].spawns[j].lane;
-        }
-    }
-
-    printf("Level %d loaded: %d waves, initial delay %d ticks\n", level_number, total_waves, wave_timer);
-}
-
-void game_update_waves() {
-    if (total_waves == 0) return;
-
-    if (current_wave >= total_waves) {
-        // All waves dispatched. Count down the post-last-wave timer before
-        // allowing completion, so the last wave's zombies have time to appear.
-        if (wave_timer > 0) {
-            wave_timer--;
-        } else if (entities_zombies_alive() == 0) {
-            game_change_state(LEVEL_COMPLETE);
-        }
-        return;
-    }
-
-    if (wave_timer > 0) {
-        wave_timer--;
-        return; // Still counting down - don't spawn yet.
-    }
-
-    // wave_timer == 0: time to spawn this wave.
-    {
-        Wave *w = &level_waves[current_wave];
-        
-        // 1. Take a snapshot of which zombie slots are currently empty
-        bool was_empty[MAX_ZOMBIES];
-        for (int z = 0; z < MAX_ZOMBIES; z++) {
-            was_empty[z] = !zombies[z].active;
-        }
-
-        // 2. Spawn all zombies for this wave (they will temporarily overlap)
-        for (int i = 0; i < w->num_zombies; i++) {
-            uint8_t lane = (uint8_t)(w->spawns[i].lane);
-            if (lane >= GRID_ROWS) lane = GRID_ROWS - 1; // clamp to valid row
-            spawn_zombie(lane, current_level);
-        }
-        
-        // 3. Find the newly spawned zombies and apply an incremental X offset
-        int lane_offsets[5] = {0}; // Tracks how many zombies we've adjusted per lane
-        
-        for (int z = 0; z < MAX_ZOMBIES; z++) {
-            // If the slot was empty before, but is now active, it's a new spawn!
-            if (was_empty[z] && zombies[z].active) {
-                uint8_t lane = zombies[z].lane;
-                
-                // Push the zombie further to the right based on how many 
-                // others spawned in this lane before it.
-                // (e.g., 1st zombie gets +0, 2nd gets +50, 3rd gets +100)
-                zombies[z].x += lane_offsets[lane] * 50; 
-                
-                // Increment the offset multiplier for the next zombie in this lane
-                lane_offsets[lane]++; 
-            }
-        }
-        
-        wave_timer = w->time_to_next_wave;
-        current_wave++;
-    }
+    // Using the modularized wave manager from HEAD
+    wave_manager_init(level_number);
 }
 
 void game_update() {
     if (current_state == PLAYING) {
-        game_update_waves();
-        if (frozen) {
-            if (freeze_timer > 0) {
-                freeze_timer--;
-            }
+        wave_manager_update();
 
-            if (freeze_timer == 0) {
-                frozen = false;
-            }
+        if (wave_manager_is_complete()) {
+            game_change_state(LEVEL_COMPLETE);
         }
 
-        bool game_over = entities_update(
-            plant_grid,
-            &suns_count,
-            &score,
-            level,
-            frozen,
-            timer_counter
-        );
+        if (frozen) {
+            if (freeze_timer > 0) freeze_timer--;
+            if (freeze_timer == 0) frozen = false;
+        }
+
+        sunflowers_update();
+        peashooters_update();
+        projectiles_update();
+        suns_update();
+        bool game_over = zombies_update();
 
         if (game_over) {
             rtc_read_date(&current_time);
@@ -327,107 +154,29 @@ void game_render() {
     else if (current_state == PLAYING) {
         vg_clear(COLOR_BG);
 
-        // top UI bar
-        vg_draw_rectangle(0, 0, SCREEN_W, 100, COLOR_UI);
+        background_render();
 
-        // draw grid background
-        if (grass_grid_pixmap != NULL) {
-            vg_draw_xpm(grass_grid_img, grass_grid_pixmap, 0, 100);
-        }
+        sunflowers_render();
+        peashooters_render();
+        zombies_render();
+        projectiles_render();
+        suns_render();
 
-        // draw plants
-        for (int r = 0; r < GRID_ROWS; r++) {
-            for (int c = 0; c < GRID_COLS; c++) {
-                int cell_x = GRID_START_X + c * CELL_W;
-                int cell_y = GRID_START_Y + r * CELL_H;
+        // Render modular UI from HEAD
+        ui_render_hud(suns_count, score, current_level, selected_plant, frozen, &current_time);
 
-                if (plant_grid[r][c].type == 1) {
-                    // sunflower
-                    if (sunflower_pixmap != NULL) {
-                        int center_x = cell_x + (CELL_W - sunflower_img.width) / 2;
-                        int center_y = cell_y + (CELL_H - sunflower_img.height) / 2;
-                        
-                        vg_draw_xpm(sunflower_img, sunflower_pixmap, center_x, center_y);
-                    }
-                }
-                else if (plant_grid[r][c].type == 2) {
-                    // peashooter
-                    if (peashooter_pixmap != NULL) {
-                        int center_x = cell_x + (CELL_W - peashooter_img.width) / 2;
-                        int center_y = cell_y + (CELL_H - peashooter_img.height) / 2;
-                        
-                        vg_draw_xpm(peashooter_img, peashooter_pixmap, center_x, center_y);
-                    }
-                }
-            }
-        }
-
-        // draw zombies, projectiles and suns
-        entities_render(GRID_START_X, GRID_START_Y, CELL_W, CELL_H, frozen);
-
-        // HUD
-        font_draw_string("SUNS:", 10, 15, 0xFFFF00);
-        font_draw_number(suns_count, 80, 15, 0xFFFF00);
-
-        font_draw_string("SCORE:", 200, 15, 0xFFFFFF);
-        font_draw_number(score, 280, 15, 0xFFFFFF);
-
-        font_draw_string("LVL:", 400, 15, 0xFFFFFF);
-        font_draw_number(current_level, 450, 15, 0xFFFFFF);
-
+        // Render player name from incoming branch
         const char *player_name = name_input_get_name();
         if (player_name[0] != '\0') {
             font_draw_string(player_name, 500, 40, 0xCCCCCC);
         }
-
-        //draw plant options
-        uint32_t sun_color = (selected_plant == 1) ? 0xFFFF00 : 0x888888;
-        uint32_t pea_color = (selected_plant == 2) ? 0x00FF00 : 0x888888;
-
-        font_draw_string("1-SUN", 10, 60, sun_color);
-        font_draw_string("2-PEA", 110, 60, pea_color);
-
-        if (frozen) {
-            font_draw_string("FROZEN", 500, 60, 0x0000FF);
-        }
-
-        // RTC time
-        char ts[9];
-        ts[0] = '0' + current_time.hours / 10;
-        ts[1] = '0' + current_time.hours % 10;
-        ts[2] = ':';
-        ts[3] = '0' + current_time.minutes / 10;
-        ts[4] = '0' + current_time.minutes % 10;
-        ts[5] = ':';
-        ts[6] = '0' + current_time.seconds / 10;
-        ts[7] = '0' + current_time.seconds % 10;
-        ts[8] = '\0';
-
-        font_draw_string(ts, 680, 15, 0xFFFFFF);
     }
     else if (current_state == LEVEL_COMPLETE) {
         vg_clear(COLOR_BG);
-
-        vg_draw_rectangle(0, 0, SCREEN_W, 100, COLOR_UI);
-
-        // draw grid
-        if (grass_grid_pixmap != NULL) {
-            vg_draw_xpm(grass_grid_img, grass_grid_pixmap, 5, 100);
-        }
-        
-        // draw results
-        font_draw_string("LEVEL COMPLETE!", 300, 250, 0xFF0000);
-        
-        font_draw_string("SUNS SPENT:", 300, 300, 0xFF0000);
-        font_draw_number(suns_spent, 450, 300, 0xFF0000);
-
-        font_draw_string("PRESS ESC TO RETURN", 250, 400, 0xFF0000);
-        
-        vg_flip();
+        background_render();
+        ui_render_level_complete(suns_spent);
     }
 
-
-    // draw mouse 
     vg_draw_rectangle(mouse_x - CURSOR_SIZE / 2, mouse_y - 1, CURSOR_SIZE, 2, COLOR_CURSOR);
     vg_draw_rectangle(mouse_x - 1, mouse_y - CURSOR_SIZE / 2, 2, CURSOR_SIZE, COLOR_CURSOR);
 
@@ -454,7 +203,7 @@ void game_on_key(uint8_t scancode) {
     }
 
     else if (current_state == LEVEL_SELECT) {
-        if (scancode == 0x81) { 
+        if (scancode == ESC_BREAKCODE) { 
             current_state = MAIN_MENU;
         }
     }
@@ -463,13 +212,8 @@ void game_on_key(uint8_t scancode) {
             current_state = MAIN_MENU;
         }
 
-        if (scancode == 0x02) {
-            selected_plant = 1;
-        }
-
-        if (scancode == 0x03) {
-            selected_plant = 2;
-        }
+        if (scancode == 0x02) selected_plant = 1;
+        if (scancode == 0x03) selected_plant = 2;
 
         if (scancode == 0x39 && !frozen) {
             frozen = true;
@@ -484,25 +228,20 @@ void game_on_key(uint8_t scancode) {
 }
 
 void game_on_mouse(struct packet *pp) {
-    // update mouse
-    mouse_x += pp->delta_x;  
-    mouse_y -= pp->delta_y; 
+    mouse_x += pp->delta_x;
+    mouse_y -= pp->delta_y;
 
-    // mouse limits
     if (mouse_x < 0) mouse_x = 0;
     if (mouse_x >= SCREEN_W) mouse_x = SCREEN_W - 1;
     if (mouse_y < 0) mouse_y = 0;
     if (mouse_y >= SCREEN_H) mouse_y = SCREEN_H - 1;
 
-    //handle click
     if (current_state == MAIN_MENU) {
         menu_on_mouse(pp, mouse_x, mouse_y);
     } 
     else if (current_state == LEVEL_SELECT) {
         static bool lvl_prev_lb = false;
         if (pp->lb && !lvl_prev_lb) {
-            
-            // Loop through your 10 squares
             for (int i = 0; i < 10; i++) {
                 int row = i / 5;
                 int col = i % 5;
@@ -512,38 +251,36 @@ void game_on_mouse(struct packet *pp) {
                 if (mouse_x >= bx && mouse_x <= bx + SQ_SIZE &&
                     mouse_y >= by && mouse_y <= by + SQ_SIZE) {
                     
-                    // Call the parser instead of just assigning a variable!
                     game_init_level(i + 1); 
                     game_change_state(PLAYING);
                     break;
                 }
+            }
+
+            if (mouse_x >= 300 && mouse_x <= 500 && mouse_y >= 410 && mouse_y <= 460) {
+                game_change_state(MAIN_MENU);
             }
         }
         lvl_prev_lb = pp->lb;
     }
     else if (current_state == PLAYING) {
         if (pp->lb && !prev_lb) {
-            // try to collect sun first
-            bool sun_collected = entities_collect_sun(mouse_x, mouse_y, &suns_count);
+            
+            bool sun_collected = suns_check_click(mouse_x, mouse_y);
 
-            // plant only if click is inside the grid
-            if(!sun_collected){
-                if (mouse_x >= GRID_START_X &&
-                    mouse_x < GRID_START_X + GRID_COLS * CELL_W &&
-                    mouse_y >= GRID_START_Y &&
-                    mouse_y < GRID_START_Y + GRID_ROWS * CELL_H) {
+            if (!sun_collected) {
+                if (mouse_x >= GRID_START_X && mouse_x < GRID_START_X + GRID_COLS * CELL_W &&
+                    mouse_y >= GRID_START_Y && mouse_y < GRID_START_Y + GRID_ROWS * CELL_H) {
 
                     int col = (mouse_x - GRID_START_X) / CELL_W;
                     int row = (mouse_y - GRID_START_Y) / CELL_H;
 
-                    if (plant_grid[row][col].type == 0) {
-                        int cost = selected_plant == 1 ? 50 : 100;
+                    int cost = (selected_plant == 1) ? 50 : 100;
 
-                        if (suns_count >= cost) {
-                            plant_grid[row][col].type = selected_plant;
-                            plant_grid[row][col].hp = 300;
-                            plant_grid[row][col].shoot_timer = 0;
-                            plant_grid[row][col].sun_timer = 0;
+                    if (suns_count >= cost) {
+                        plant_type_t p_type = (selected_plant == 1) ? PLANT_SUNFLOWER : PLANT_PEASHOOTER;
+                        
+                        if (board_place_plant(row, col, p_type)) {
                             suns_count -= cost;
                             suns_spent += cost;
                         }
@@ -561,7 +298,6 @@ void level_select_render(int mouse_x, int mouse_y) {
 
     font_draw_string("SELECT A LEVEL", 310, 100, 0xFFFFFF);
 
-    // Draw 10 squares arranged into 2 rows of 5
     for (int i = 0; i < 10; i++) {
         int row = i / 5;
         int col = i % 5;
