@@ -10,7 +10,8 @@ typedef enum {
     NAME_INPUT,
     PLAYING,
     LEVEL_COMPLETE,
-    LEVEL_SELECT
+    LEVEL_SELECT,
+    GAME_OVER
 } GameState;
 
 void game_init();

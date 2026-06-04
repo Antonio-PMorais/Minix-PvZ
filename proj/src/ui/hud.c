@@ -61,3 +61,14 @@ void ui_render_level_complete(int suns_spent) {
         font_draw_string("YOU COMPLETED THE GAME!! THX FOR PLAYING :)", 292, 420, 0x00FF00);
     }
 }
+
+void ui_render_game_over(int suns_spent) {
+    vg_draw_rectangle(220, 200, 360, 260, 0x111111);
+
+    font_draw_string("GAME OVER!", 340, 240, 0xFF0000); 
+    
+    font_draw_string("SUNS SPENT:", 304, 300, 0xFFFFFF);
+    font_draw_number(suns_spent, 448, 300, 0xFFFFFF);
+
+    font_draw_string("PRESS ESC TO RETURN", 286, 380, 0xFFFFFF);
+}

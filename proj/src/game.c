@@ -125,7 +125,7 @@ void game_update() {
 
         if (game_over) {
             rtc_read_date(&current_time);
-            current_state = MAIN_MENU;
+            current_state = GAME_OVER;
         }
 
         rtc_timer++;
@@ -171,6 +171,12 @@ void game_render() {
         background_render();
         ui_render_hud(suns_count, score, current_level, selected_plant, frozen, &current_time);
         ui_render_level_complete(suns_spent);
+    }
+    else if (current_state == GAME_OVER) {
+        vg_clear(COLOR_BG);
+        background_render();
+        ui_render_hud(suns_count, score, current_level, selected_plant, frozen, &current_time);
+        ui_render_game_over(suns_spent);
     }
 
     vg_draw_rectangle(mouse_x - CURSOR_SIZE / 2, mouse_y - 1, CURSOR_SIZE, 2, COLOR_CURSOR);
@@ -224,6 +230,10 @@ void game_on_key(uint8_t scancode) {
         if (scancode == 0x1C && current_level < 10) { 
             game_init_level(current_level + 1);
             game_change_state(PLAYING);
+        }
+    } else if (current_state == GAME_OVER) {
+        if (scancode == ESC_BREAKCODE) {
+            current_state = MAIN_MENU;
         }
     }
 }

@@ -23,6 +23,8 @@ void menu_init() {
 void menu_render(int mouse_x, int mouse_y) {
     vg_clear(0x111111);
 
+    font_draw_string("MINIX PVZ", 346, 80, 0xEEEEEE);
+
     uint32_t play_color = 0x005500;
     uint32_t levels_color = 0x555500;
     uint32_t exit_color = 0x550000;

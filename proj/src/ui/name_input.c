@@ -81,23 +81,23 @@ void name_input_render() {
     vg_draw_rectangle(0, 0, 800, 600, 0x1A1A2E);
 
     // title 
-    font_draw_string("ENTER YOUR NAME", 260, 150, 0x00FF00);
+    font_draw_string("ENTER YOUR NAME", 310, 180, 0x00FF00);
 
     // draw input box /
-    vg_draw_rectangle(200, 250, 400, 50, 0x333355);
+    vg_draw_rectangle(200, 280, 400, 50, 0x333355);
 
     //mdraw current name
     if (name_len > 0) {
-        font_draw_string(player_name, 220, 265, 0xFFFFFF);
+        font_draw_string(player_name, 220, 295, 0xFFFFFF);
     }
 
     // blinking cursor 
     int cursor_x = 220 + name_len * 12;
-    vg_draw_rectangle(cursor_x, 265, 2, 20, 0xFFFFFF);
+    vg_draw_rectangle(cursor_x, 295, 2, 20, 0xFFFFFF);
 
     // instructions 
-    font_draw_string("TYPE YOUR NAME AND PRESS ENTER", 180, 350, 0x888888);
-    font_draw_string("BACKSPACE TO DELETE", 260, 380, 0x888888);
+    font_draw_string("TYPE YOUR NAME AND PRESS ENTER", 220, 380, 0x888888);
+    font_draw_string("BACKSPACE TO DELETE", 286, 410, 0x888888);
 }
 
 const char* name_input_get_name() {
