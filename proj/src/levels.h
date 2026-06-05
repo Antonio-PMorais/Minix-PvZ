@@ -1,3 +1,8 @@
+/**
+ * @file levels.h
+ * @brief Level configurations, wave details, and spawning logic.
+ */
+
 #ifndef LEVELS_H
 #define LEVELS_H
 
@@ -6,23 +11,35 @@
 #define MAX_WAVES 10
 #define MAX_ZOMBIES_PER_WAVE 20
 
+/**
+ * @brief Defines the spawn parameters for a single zombie.
+ */
 typedef struct {
-    uint8_t type;
-    uint8_t lane;
+    uint8_t type; /**< @brief The type of zombie. */
+    uint8_t lane; /**< @brief The grid lane for the spawn. */
 } ZombieSpawnConfig;
 
+/**
+ * @brief Defines a wave composed of multiple zombies.
+ */
 typedef struct {
-    int num_zombies;
-    ZombieSpawnConfig spawns[MAX_ZOMBIES_PER_WAVE];
-    int time_to_next_wave; 
+    int num_zombies;                                 /**< @brief Total zombies in this wave. */
+    ZombieSpawnConfig spawns[MAX_ZOMBIES_PER_WAVE];  /**< @brief Configuration array for the spawns. */
+    int time_to_next_wave;                           /**< @brief Time delay until the next wave begins. */
 } Wave;
 
+/**
+ * @brief Defines the overall structure and parameters of a level.
+ */
 typedef struct {
-    int initial_delay; 
-    int total_waves;
-    Wave waves[MAX_WAVES];
+    int initial_delay;           /**< @brief Delay before the first wave begins. */
+    int total_waves;             /**< @brief Total number of waves in the level. */
+    Wave waves[MAX_WAVES];       /**< @brief Array holding the wave configurations. */
 } LevelConfig;
 
+/**
+ * @brief Constant array defining all levels in the game.
+ */
 static const LevelConfig ALL_LEVELS[] = {
     
     // LEVEL 1
