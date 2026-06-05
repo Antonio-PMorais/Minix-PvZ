@@ -264,7 +264,9 @@ void game_on_key(uint8_t scancode) {
             shovel_mode = !shovel_mode;
         }
 
-        if (scancode == 0x39 && !frozen) {
+        if (scancode == 0x39 && !frozen && suns_count >= 10) {
+            suns_count -= 10;
+            suns_spent += 10;
             frozen = true;
             freeze_timer = 180;
         }

@@ -105,7 +105,9 @@ void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_froze
     }
 
     if (is_frozen) {
-        font_draw_string("FROZEN", 500, 60, 0x0000FF);
+        font_draw_string("FROZEN", 520, 60, 0x0000FF);
+    } else {
+        font_draw_string("FRZ-SPC", 520, 60, 0x888888);
     }
 
     if (time != NULL) {
