@@ -2,12 +2,41 @@
 #include "font.h"
 #include "v_card.h"
 #include "game_state.h"
+#include "plants_cooldown.h"
+#include "board.h"
+
+#include "../sprites/peashooter_icon_loaded_selected.xpm"
+#include "../sprites/peashooter_icon_loaded_unselected.xpm"
+#include "../sprites/peashooter_icon_unloaded_selected.xpm"
+#include "../sprites/peashooter_icon_unloaded_unselected.xpm"
+#include "../sprites/sunflower_icon_loaded_selected.xpm"
+#include "../sprites/sunflower_icon_loaded_unselected.xpm"
+#include "../sprites/sunflower_icon_unloaded_selected.xpm"
+#include "../sprites/sunflower_icon_unloaded_unselected.xpm"
+
+static xpm_image_t pea_ls_img, pea_lu_img, pea_us_img, pea_uu_img;
+static uint8_t *pea_ls_pix = NULL, *pea_lu_pix = NULL, *pea_us_pix = NULL, *pea_uu_pix = NULL;
+static xpm_image_t sun_ls_img, sun_lu_img, sun_us_img, sun_uu_img;
+static uint8_t *sun_ls_pix = NULL, *sun_lu_pix = NULL, *sun_us_pix = NULL, *sun_uu_pix = NULL;
+
+// load sprites
+void hud_init() {
+    pea_ls_pix = xpm_load((xpm_map_t) peashooter_icon_loaded_selected_xpm, XPM_8_8_8_8, &pea_ls_img);
+    pea_lu_pix = xpm_load((xpm_map_t) peashooter_icon_loaded_unselected_xpm, XPM_8_8_8_8, &pea_lu_img);
+    pea_us_pix = xpm_load((xpm_map_t) peashooter_icon_unloaded_selected_xpm, XPM_8_8_8_8, &pea_us_img);
+    pea_uu_pix = xpm_load((xpm_map_t) peashooter_icon_unloaded_unselected_xpm, XPM_8_8_8_8, &pea_uu_img);
+
+    sun_ls_pix = xpm_load((xpm_map_t) sunflower_icon_loaded_selected_xpm, XPM_8_8_8_8, &sun_ls_img);
+    sun_lu_pix = xpm_load((xpm_map_t) sunflower_icon_loaded_unselected_xpm, XPM_8_8_8_8, &sun_lu_img);
+    sun_us_pix = xpm_load((xpm_map_t) sunflower_icon_unloaded_selected_xpm, XPM_8_8_8_8, &sun_us_img);
+    sun_uu_pix = xpm_load((xpm_map_t) sunflower_icon_unloaded_unselected_xpm, XPM_8_8_8_8, &sun_uu_img);
+}
 
 void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_frozen, bool is_shovel_mode, rtc_date *time) {
     // top bar
     vg_draw_rectangle(0, 0, 800, 100, 0x3b4d24);
 
-    // Sstats
+    // stats
     font_draw_string("SUNS:", 10, 15, 0xFFFF00);
     font_draw_number(suns, 80, 15, 0xFFFF00);
 
@@ -21,11 +50,59 @@ void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_froze
     font_draw_string("R-SHOVEL", 520, 15, shovel_color);
 
     // plants
-    uint32_t sun_color = (selected_plant == 1) ? 0xFFFF00 : 0x888888;
-    uint32_t pea_color = (selected_plant == 2) ? 0x00FF00 : 0x888888;
+    uint32_t sun_color = (selected_plant == 1) ? 0x00FF00 : 0x888888;
+    font_draw_string("1-", 10, 60, sun_color);
 
-    font_draw_string("1-SUN", 10, 60, sun_color);
-    font_draw_string("2-PEA", 110, 60, pea_color);
+    uint32_t pea_color = (selected_plant == 2) ? 0x00FF00 : 0x888888;
+    font_draw_string("2-", 110, 60, pea_color);
+
+    uint8_t *sun_pix_to_draw = NULL;
+    xpm_image_t sun_img_to_draw;
+    bool is_sun_selected = (selected_plant == 1);
+    bool is_sun_ready = cooldown_is_ready(PLANT_SUNFLOWER);
+
+    bool is_pea_selected = (selected_plant == 2);
+    bool is_pea_ready = cooldown_is_ready(PLANT_PEASHOOTER);
+    uint8_t *pea_pix_to_draw = NULL;
+    xpm_image_t pea_img_to_draw;
+    
+
+    //choose icon according to plant state
+    if (is_sun_ready && is_sun_selected) {
+        sun_pix_to_draw = sun_ls_pix;
+        sun_img_to_draw = sun_ls_img;
+    } else if (is_sun_ready && !is_sun_selected) {
+        sun_pix_to_draw = sun_lu_pix;
+        sun_img_to_draw = sun_lu_img;
+    } else if (!is_sun_ready && is_sun_selected) {
+        sun_pix_to_draw = sun_us_pix;
+        sun_img_to_draw = sun_us_img;
+    } else {
+        sun_pix_to_draw = sun_uu_pix;
+        sun_img_to_draw = sun_uu_img;
+    }
+
+    if (is_pea_ready && is_pea_selected) {
+        pea_pix_to_draw = pea_ls_pix;
+        pea_img_to_draw = pea_ls_img;
+    } else if (is_pea_ready && !is_pea_selected) {
+        pea_pix_to_draw = pea_lu_pix;
+        pea_img_to_draw = pea_lu_img;
+    } else if (!is_pea_ready && is_pea_selected) {
+        pea_pix_to_draw = pea_us_pix;
+        pea_img_to_draw = pea_us_img;
+    } else {
+        pea_pix_to_draw = pea_uu_pix;
+        pea_img_to_draw = pea_uu_img;
+    }
+
+    if (sun_pix_to_draw != NULL) {
+        vg_draw_xpm(sun_img_to_draw, sun_pix_to_draw, 40, 36); 
+    }
+
+    if (pea_pix_to_draw != NULL) {
+        vg_draw_xpm(pea_img_to_draw, pea_pix_to_draw, 140, 36); 
+    }
 
     if (is_frozen) {
         font_draw_string("FROZEN", 500, 60, 0x0000FF);

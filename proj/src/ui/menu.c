@@ -11,10 +11,10 @@
 #define BTN_PLAY_Y 160
 #define BTN_LEVELS_X 300
 #define BTN_LEVELS_Y 250
-#define BTN_EXIT_X 300
-#define BTN_EXIT_Y 340
 #define BTN_SCORE_X 300
-#define BTN_SCORE_Y 430
+#define BTN_SCORE_Y 340
+#define BTN_EXIT_X 300
+#define BTN_EXIT_Y 430
 
 static bool prev_lb = false;
 
