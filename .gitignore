@@ -14,5 +14,6 @@ output.txt
 .depend
 .gdbinit
 
+!Doxyfile
 doc/html/
 doc/latex/
