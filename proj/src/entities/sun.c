@@ -53,7 +53,13 @@ void suns_update() {
         int margin = 26;
         int16_t sx = margin + (rand() % (800 - 2 * margin));
         int16_t sy = 100 + margin + (rand() % (500 - 2 * margin));
-        spawn_sun(sx, margin, sy);
+
+        int16_t start_y = sy - 200;
+        if (start_y < margin) {
+            start_y = margin;
+        }
+
+        spawn_sun(sx, start_y, sy);
     }
 }
 
