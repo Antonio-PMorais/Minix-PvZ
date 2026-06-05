@@ -44,7 +44,7 @@ void sunflowers_update() {
         if (!sunflowers[i].active) continue;
 
         sunflowers[i].sun_timer++;
-        if (sunflowers[i].sun_timer >= 1440) {
+        if (sunflowers[i].sun_timer >= 840) {
             sunflowers[i].sun_timer = 0;
             int sx = GRID_START_X + sunflowers[i].col * CELL_W + 20 + (rand() % 40);
             int sy = GRID_START_Y + sunflowers[i].row * CELL_H + 20 + (rand() % 40);
