@@ -3,6 +3,7 @@
 #include "sunflower.h"
 #include "peashooter.h"
 #include <stddef.h>
+#include "nut.h"
 
 static plant_type_t grid[GRID_ROWS][GRID_COLS];
 
@@ -37,6 +38,11 @@ bool board_place_plant(int row, int col, plant_type_t type) {
             grid[row][col] = PLANT_PEASHOOTER;
             return true;
         }
+    } else if (type == PLANT_NUT) {
+        if(nuts_spawn(row, col)) {
+            grid[row][col] = PLANT_NUT;
+            return true;
+        }
     }
     return false;
 }
@@ -48,6 +54,8 @@ void board_take_damage(int row, int col, int damage) {
         sunflowers_take_damage(row, col, damage);
     } else if (grid[row][col] == PLANT_PEASHOOTER) {
         peashooters_take_damage(row, col, damage);
+    } else if (grid[row][col] == PLANT_NUT) { // Add this block
+        nuts_take_damage(row, col, damage);
     }
 }
 

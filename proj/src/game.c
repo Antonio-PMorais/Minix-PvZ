@@ -21,6 +21,7 @@
 #include "name_input.h"
 #include "scoreboard.h"
 #include "plants_cooldown.h"
+#include "nut.h"
  
 
 int suns_count = 150;
@@ -90,6 +91,7 @@ void game_init() {
     board_init();
     sunflowers_init();
     peashooters_init();
+    nuts_init();
     zombies_init();
     projectiles_init();
     suns_init();
@@ -105,6 +107,7 @@ void game_init_level(int level_number) {
     board_init();
     sunflowers_init();
     peashooters_init();
+    nuts_init();
     zombies_init();
     projectiles_init();
     suns_init();
@@ -149,6 +152,7 @@ void game_update() {
 
         sunflowers_update();
         peashooters_update();
+        nuts_update();
         projectiles_update();
         suns_update();
         cooldowns_update();
@@ -186,6 +190,7 @@ void game_render() {
 
         sunflowers_render();
         peashooters_render();
+        nuts_render();
         zombies_render();
         projectiles_render();
         suns_render();
@@ -260,6 +265,7 @@ void game_on_key(uint8_t scancode) {
 
         if (scancode == 0x02) selected_plant = 1;
         if (scancode == 0x03) selected_plant = 2;
+        if (scancode == 0x04) selected_plant = 3;
         if (scancode == 0x13) {
             shovel_mode = !shovel_mode;
         }
@@ -346,10 +352,21 @@ void game_on_mouse(struct packet *pp) {
                             board_take_damage(row, col, 10000);
                         }
                     } else {
-                        int cost = (selected_plant == 1) ? 50 : 100;
-                        plant_type_t p_type = (selected_plant == 1) ? PLANT_SUNFLOWER : PLANT_PEASHOOTER;
+                        int cost = 0;
+                        plant_type_t p_type = PLANT_NONE;
 
-                        if (suns_count >= cost && cooldown_is_ready(p_type)) {
+                        if (selected_plant == 1) {
+                            cost = 50;
+                            p_type = PLANT_SUNFLOWER;
+                        } else if (selected_plant == 2) {
+                            cost = 100;
+                            p_type = PLANT_PEASHOOTER;
+                        } else if (selected_plant == 3) { // Add this block for the Nut
+                            cost = 50; // Standard cost for a Wall-nut
+                            p_type = PLANT_NUT;
+                        }
+
+                        if (p_type != PLANT_NONE && suns_count >= cost && cooldown_is_ready(p_type)) {
                             if (board_place_plant(row, col, p_type)) {
                                 suns_count -= cost;
                                 suns_spent += cost;

@@ -15,7 +15,8 @@
 typedef enum { 
     PLANT_NONE = 0, 
     PLANT_SUNFLOWER = 1, 
-    PLANT_PEASHOOTER = 2 
+    PLANT_PEASHOOTER = 2,
+    PLANT_NUT = 3
 } plant_type_t;
 
 /**

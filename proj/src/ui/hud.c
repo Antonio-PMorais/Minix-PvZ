@@ -13,11 +13,17 @@
 #include "../sprites/sunflower_icon_loaded_unselected.xpm"
 #include "../sprites/sunflower_icon_unloaded_selected.xpm"
 #include "../sprites/sunflower_icon_unloaded_unselected.xpm"
+#include "../sprites/nut_icon_loaded_selected.xpm"
+#include "../sprites/nut_icon_loaded_unselected.xpm"
+#include "../sprites/nut_icon_unloaded_selected.xpm"
+#include "../sprites/nut_icon_unloaded_unselected.xpm"
 
 static xpm_image_t pea_ls_img, pea_lu_img, pea_us_img, pea_uu_img;
 static uint8_t *pea_ls_pix = NULL, *pea_lu_pix = NULL, *pea_us_pix = NULL, *pea_uu_pix = NULL;
 static xpm_image_t sun_ls_img, sun_lu_img, sun_us_img, sun_uu_img;
 static uint8_t *sun_ls_pix = NULL, *sun_lu_pix = NULL, *sun_us_pix = NULL, *sun_uu_pix = NULL;
+static xpm_image_t nut_ls_img, nut_lu_img, nut_us_img, nut_uu_img;
+static uint8_t *nut_ls_pix = NULL, *nut_lu_pix = NULL, *nut_us_pix = NULL, *nut_uu_pix = NULL;
 
 // load sprites
 void hud_init() {
@@ -30,6 +36,11 @@ void hud_init() {
     sun_lu_pix = xpm_load((xpm_map_t) sunflower_icon_loaded_unselected_xpm, XPM_8_8_8_8, &sun_lu_img);
     sun_us_pix = xpm_load((xpm_map_t) sunflower_icon_unloaded_selected_xpm, XPM_8_8_8_8, &sun_us_img);
     sun_uu_pix = xpm_load((xpm_map_t) sunflower_icon_unloaded_unselected_xpm, XPM_8_8_8_8, &sun_uu_img);
+
+    nut_ls_pix = xpm_load((xpm_map_t) nut_icon_loaded_selected_xpm, XPM_8_8_8_8, &nut_ls_img);
+    nut_lu_pix = xpm_load((xpm_map_t) nut_icon_loaded_unselected_xpm, XPM_8_8_8_8, &nut_lu_img);
+    nut_us_pix = xpm_load((xpm_map_t) nut_icon_unloaded_selected_xpm, XPM_8_8_8_8, &nut_us_img);
+    nut_uu_pix = xpm_load((xpm_map_t) nut_icon_unloaded_unselected_xpm, XPM_8_8_8_8, &nut_uu_img);
 }
 
 void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_frozen, bool is_shovel_mode, rtc_date *time) {
@@ -56,6 +67,9 @@ void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_froze
     uint32_t pea_color = (selected_plant == 2) ? 0x00FF00 : 0x888888;
     font_draw_string("2-", 110, 60, pea_color);
 
+    uint32_t nut_color = (selected_plant == 3) ? 0x00FF00 : 0x888888;
+    font_draw_string("3-", 210, 60, nut_color);
+
     uint8_t *sun_pix_to_draw = NULL;
     xpm_image_t sun_img_to_draw;
     bool is_sun_selected = (selected_plant == 1);
@@ -65,6 +79,11 @@ void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_froze
     bool is_pea_ready = cooldown_is_ready(PLANT_PEASHOOTER);
     uint8_t *pea_pix_to_draw = NULL;
     xpm_image_t pea_img_to_draw;
+
+    bool is_nut_selected = (selected_plant == 3);
+    bool is_nut_ready = cooldown_is_ready(PLANT_NUT);
+    uint8_t *nut_pix_to_draw = NULL;
+    xpm_image_t nut_img_to_draw;
     
 
     //choose icon according to plant state
@@ -96,12 +115,30 @@ void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_froze
         pea_img_to_draw = pea_uu_img;
     }
 
+    if (is_nut_ready && is_nut_selected) {
+        nut_pix_to_draw = nut_ls_pix;
+        nut_img_to_draw = nut_ls_img;
+    } else if (is_nut_ready && !is_nut_selected) {
+        nut_pix_to_draw = nut_lu_pix;
+        nut_img_to_draw = nut_lu_img;
+    } else if (!is_nut_ready && is_nut_selected) {
+        nut_pix_to_draw = nut_us_pix;
+        nut_img_to_draw = nut_us_img;
+    } else {
+        nut_pix_to_draw = nut_uu_pix;
+        nut_img_to_draw = nut_uu_img;
+    }
+
     if (sun_pix_to_draw != NULL) {
         vg_draw_xpm(sun_img_to_draw, sun_pix_to_draw, 40, 36); 
     }
 
     if (pea_pix_to_draw != NULL) {
         vg_draw_xpm(pea_img_to_draw, pea_pix_to_draw, 140, 36); 
+    }
+
+    if (nut_pix_to_draw != NULL) {
+        vg_draw_xpm(nut_img_to_draw, nut_pix_to_draw, 240, 36); 
     }
 
     if (is_frozen) {
