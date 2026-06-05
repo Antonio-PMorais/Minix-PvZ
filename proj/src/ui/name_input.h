@@ -18,7 +18,4 @@ void name_input_render();
 // get the current player name 
 const char* name_input_get_name();
 
-// get player name length
-int name_input_get_length();
-
 #endif

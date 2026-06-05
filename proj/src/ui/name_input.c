@@ -103,7 +103,3 @@ void name_input_render() {
 const char* name_input_get_name() {
     return player_name;
 }
-
-int name_input_get_length() {
-    return name_len;
-}
