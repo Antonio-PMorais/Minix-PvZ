@@ -3,8 +3,8 @@
 #include "game_state.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "sprites/sun.xpm"
-#include "sprites/sun_fading.xpm"
+#include "sprites/misc/sun.xpm"
+#include "sprites/misc/sun_fading.xpm"
 
 #define SUN_BLINK_THRESHOLD 180
 #define SUN_BLINK_PERIOD 15

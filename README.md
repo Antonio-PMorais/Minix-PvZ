@@ -1,58 +1,22 @@
-# Template
+# Minix PvZ
 
+Minix PvZ is our *somewhat* faithful recreation of PopCap's *Plants vs Zombies*, for LCOM 2026.
 
+## Running the game
 
-## Getting started
-
-Welcome to your LCOM code repository. This is where your team should deliver all the required artifacts, including code.
-Please take your time to get acquainted with GitLab and its functionalities. The way your team uses Git and GitLab to collaborate will be evaluated. 
-
-## Boilerplate
-
-In this repository, you will find some pre-loaded files and an initial setup of your team's project board. 
-Along the semester, you will be adding files and folders to this repository.
-Make sure you expand on the issues and milestones for your project, helping your team to coordinate and meet all the deadlines. Major deadlines are already setup but you should add your own sub-issues, additional issues, and deadlines. 
-
-## GitLab Setup 
-
-### Add your files
-
-* [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.up.pt/lcom-26/template.git
-git branch -M main
-git push -uf origin main
+Inside lcom's minix VM, you can run the game like so:
+```bash
+cd labs/proj/
+make
+lcom_run proj
 ```
 
-### Integrate with your tools
+## Documentation
 
-* [Set up project integrations](https://gitlab.up.pt/lcom-26/template/-/settings/integrations)
-
-### Collaborate with your team
-
-* [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
-
-### Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
+The documentation for the project's code can be built using doxygen, using the Doxyfile in `proj/doc/`
 
 ## License
-For open source projects, say how it is licensed.
+This project is licensed under the MIT License.
 
 ## Declaration of Responsible AI Use
 
@@ -71,6 +35,8 @@ Signed: Tiago Filipe, António Charrão, António Morais, Daria Mahdych
 Date: 26/02/2026
 
 ## Authors and acknowledgment
+
+Sprites and fonts were pulled from https://www.spriters-resource.com/ds_dsi/pvszds/
 
 LCOM Project for group GRUPO_2LEIC<m><n>_<p>.
 Group members:

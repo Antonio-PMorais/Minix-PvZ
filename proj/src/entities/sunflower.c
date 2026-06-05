@@ -5,7 +5,13 @@
 #include "v_card.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "sprites/sunflower.xpm"
+#include "sprites/plants/sunflower/sunflower_idle_1.xpm"
+#include "sprites/plants/sunflower/sunflower_idle_2.xpm"
+#include "sprites/plants/sunflower/sunflower_idle_3.xpm"
+#include "sprites/plants/sunflower/sunflower_idle_4.xpm"
+#include "sprites/plants/sunflower/sunflower_idle_5.xpm"
+#include "sprites/plants/sunflower/sunflower_idle_6.xpm"
+#include "animated_sprite.h"
 
 #define MAX_SUNFLOWERS 45
 
@@ -17,12 +23,27 @@ typedef struct {
 } sunflower_t;
 
 static sunflower_t sunflowers[MAX_SUNFLOWERS];
-static xpm_image_t sunflower_img;
-static uint8_t *sunflower_pixmap = NULL;
+static struct animated_sprite sunflower_idle_sprite;
 
 void sunflowers_init() {
     for (int i = 0; i < MAX_SUNFLOWERS; i++) sunflowers[i].active = false;
-    sunflower_pixmap = xpm_load((xpm_map_t) sunflower_xpm, XPM_8_8_8_8, &sunflower_img);
+    
+    char **sunflower_idle_frames[] = {
+        sunflower_idle_1_xpm,
+        sunflower_idle_2_xpm,
+        sunflower_idle_3_xpm,
+        sunflower_idle_4_xpm,
+        sunflower_idle_5_xpm,
+        sunflower_idle_6_xpm,
+        sunflower_idle_6_xpm,
+        sunflower_idle_5_xpm,
+        sunflower_idle_4_xpm,
+        sunflower_idle_3_xpm,
+        sunflower_idle_2_xpm,
+        sunflower_idle_1_xpm,
+    };
+
+    init_animated_sprite(&sunflower_idle_sprite, 12, 5, sunflower_idle_frames, XPM_8_8_8_8);
 }
 
 bool sunflowers_spawn(int row, int col) {
@@ -54,15 +75,16 @@ void sunflowers_update() {
 }
 
 void sunflowers_render() {
-    if (sunflower_pixmap == NULL) return;
+    if (get_animated_sprite_pixmap(&sunflower_idle_sprite) == NULL) return;
     for (int i = 0; i < MAX_SUNFLOWERS; i++) {
         if (!sunflowers[i].active) continue;
         int cell_x = GRID_START_X + sunflowers[i].col * CELL_W;
         int cell_y = GRID_START_Y + sunflowers[i].row * CELL_H;
-        int draw_x = cell_x + (CELL_W - sunflower_img.width) / 2;
-        int draw_y = cell_y + (CELL_H - sunflower_img.height) / 2;
-        vg_draw_xpm(sunflower_img, sunflower_pixmap, draw_x, draw_y);
+        int draw_x = cell_x + (CELL_W - get_animated_sprite_image(&sunflower_idle_sprite).width) / 2;
+        int draw_y = cell_y + (CELL_H - get_animated_sprite_image(&sunflower_idle_sprite).height) / 2;
+        vg_draw_xpm(get_animated_sprite_image(&sunflower_idle_sprite), get_animated_sprite_pixmap(&sunflower_idle_sprite), draw_x, draw_y);
     }
+    tick_animated_sprite(&sunflower_idle_sprite);
 }
 
 void sunflowers_take_damage(int row, int col, int damage) {

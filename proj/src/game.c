@@ -13,7 +13,7 @@
 #include "hud.h"
 #include "sunflower.h"
 #include "peashooter.h"
-#include "sprites/shovel.xpm"
+#include "sprites/misc/shovel.xpm"
 #include "zombie.h"
 #include "sun.h"
 #include "projectile.h"

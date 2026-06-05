@@ -3,15 +3,33 @@
 #include "game_state.h"
 #include "board.h"
 #include <stdio.h>
-#include "sprites/zombie_default.xpm"
+#include "sprites/zombies/basic/zombie_basic_walking_1.xpm"
+#include "sprites/zombies/basic/zombie_basic_walking_2.xpm"
+#include "sprites/zombies/basic/zombie_basic_walking_3.xpm"
+#include "sprites/zombies/basic/zombie_basic_walking_4.xpm"
+#include "sprites/zombies/basic/zombie_basic_walking_5.xpm"
+#include "sprites/zombies/basic/zombie_basic_walking_6.xpm"
+#include "sprites/zombies/basic/zombie_basic_walking_7.xpm"
+#include "animated_sprite.h"
 
 zombie_t zombies[MAX_ZOMBIES];
-static xpm_image_t zombie_default_img;
-static uint8_t *zombie_default_pixmap = NULL;
+
+static struct animated_sprite zombie_walking_sprite;
 
 void zombies_init() {
     for (int i = 0; i < MAX_ZOMBIES; i++) zombies[i].active = false;
-    zombie_default_pixmap = xpm_load((xpm_map_t) zombie_default_xpm, XPM_8_8_8_8, &zombie_default_img);
+
+    char **zombie_walk_frames[] = {
+        zombie_basic_walking_1_xpm,
+        zombie_basic_walking_2_xpm,
+        zombie_basic_walking_3_xpm,
+        zombie_basic_walking_4_xpm,
+        zombie_basic_walking_5_xpm,
+        zombie_basic_walking_6_xpm,
+        zombie_basic_walking_7_xpm,
+    };
+
+    init_animated_sprite(&zombie_walking_sprite, 7, 6, zombie_walk_frames, XPM_8_8_8_8);
 }
 
 void spawn_zombie(uint8_t lane, int level) {
@@ -60,10 +78,11 @@ bool zombies_update() {
 
 void zombies_render() {
     for (int z = 0; z < MAX_ZOMBIES; z++) {
-        if (!zombies[z].active || zombie_default_pixmap == NULL) continue;
-        int draw_y = GRID_START_Y + zombies[z].lane * CELL_H + CELL_H - zombie_default_img.height - 10;
-        vg_draw_xpm(zombie_default_img, zombie_default_pixmap, zombies[z].x, draw_y);
+        if (!zombies[z].active || get_animated_sprite_pixmap(&zombie_walking_sprite) == NULL) continue;
+        int draw_y = GRID_START_Y + zombies[z].lane * CELL_H + CELL_H - get_animated_sprite_image(&zombie_walking_sprite).height - 10;
+        vg_draw_xpm(get_animated_sprite_image(&zombie_walking_sprite), get_animated_sprite_pixmap(&zombie_walking_sprite), zombies[z].x, draw_y);
     }
+    tick_animated_sprite(&zombie_walking_sprite);
 }
 
 int zombies_alive_count() {

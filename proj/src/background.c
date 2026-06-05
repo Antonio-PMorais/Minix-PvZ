@@ -2,7 +2,7 @@
 #include "v_card.h"
 #include "game_state.h"
 #include <stdio.h>
-#include "sprites/grass_grid.xpm"
+#include "sprites/world/grass_grid.xpm"
 
 static xpm_image_t grass_grid_img;
 static uint8_t *grass_grid_pixmap = NULL;
