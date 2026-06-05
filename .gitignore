@@ -13,3 +13,6 @@ output.txt
 
 .depend
 .gdbinit
+
+doc/html/
+doc/latex/
