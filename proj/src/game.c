@@ -13,6 +13,7 @@
 #include "hud.h"
 #include "sunflower.h"
 #include "peashooter.h"
+#include "sprites/shovel.xpm"
 #include "zombie.h"
 #include "sun.h"
 #include "projectile.h"
@@ -49,6 +50,9 @@ static bool quit = false;
 static int selected_plant = 1;
 static uint32_t freeze_timer = 0;
 static int suns_spent = 0;
+static bool shovel_mode = false;
+static xpm_image_t shovel_img;
+static uint8_t *shovel_pixmap = NULL;
 
 // RTC
 static uint32_t rtc_timer = 0;
@@ -77,6 +81,9 @@ void game_init() {
     freeze_timer = 0;
     rtc_timer = 0;
     suns_spent = 0;
+    shovel_mode = false;
+
+    shovel_pixmap = xpm_load((xpm_map_t) shovel_xpm, XPM_8_8_8_8, &shovel_img);
 
     background_init();
     board_init();
@@ -104,6 +111,7 @@ void game_init_level(int level_number) {
     selected_plant = 1;
     frozen = false;
     freeze_timer = 0;
+    shovel_mode = false;
 
     current_level = level_number;
     
@@ -176,7 +184,7 @@ void game_render() {
         suns_render();
 
         // Render modular UI from HEAD
-        ui_render_hud(suns_count, score, current_level, selected_plant, frozen, &current_time);
+        ui_render_hud(suns_count, score, current_level, selected_plant, frozen, shovel_mode, &current_time);
 
         // Render player name from incoming branch
         const char *player_name = name_input_get_name();
@@ -187,13 +195,13 @@ void game_render() {
     else if (current_state == LEVEL_COMPLETE) {
         vg_clear(COLOR_BG);
         background_render();
-        ui_render_hud(suns_count, score, current_level, selected_plant, frozen, &current_time);
+        ui_render_hud(suns_count, score, current_level, selected_plant, frozen, shovel_mode, &current_time);
         ui_render_level_complete(suns_spent);
     }
     else if (current_state == GAME_OVER) {
         vg_clear(COLOR_BG);
         background_render();
-        ui_render_hud(suns_count, score, current_level, selected_plant, frozen, &current_time);
+        ui_render_hud(suns_count, score, current_level, selected_plant, frozen, shovel_mode, &current_time);
         ui_render_game_over(suns_spent);
     }
 
@@ -201,8 +209,14 @@ void game_render() {
         scoreboard_render();
     }
 
-    vg_draw_rectangle(mouse_x - CURSOR_SIZE / 2, mouse_y - 1, CURSOR_SIZE, 2, COLOR_CURSOR);
-    vg_draw_rectangle(mouse_x - 1, mouse_y - CURSOR_SIZE / 2, 2, CURSOR_SIZE, COLOR_CURSOR);
+    if (current_state == PLAYING && shovel_mode && shovel_pixmap != NULL) {
+        int draw_x = mouse_x - shovel_img.width / 2;
+        int draw_y = mouse_y - shovel_img.height / 2;
+        vg_draw_xpm(shovel_img, shovel_pixmap, draw_x, draw_y);
+    } else {
+        vg_draw_rectangle(mouse_x - CURSOR_SIZE / 2, mouse_y - 1, CURSOR_SIZE, 2, COLOR_CURSOR);
+        vg_draw_rectangle(mouse_x - 1, mouse_y - CURSOR_SIZE / 2, 2, CURSOR_SIZE, COLOR_CURSOR);
+    }
 
     vg_flip();
 }
@@ -234,10 +248,14 @@ void game_on_key(uint8_t scancode) {
     else if (current_state == PLAYING) {
         if (scancode == ESC_BREAKCODE) {
             current_state = MAIN_MENU;
+            shovel_mode = false;
         }
 
         if (scancode == 0x02) selected_plant = 1;
         if (scancode == 0x03) selected_plant = 2;
+        if (scancode == 0x13) {
+            shovel_mode = !shovel_mode;
+        }
 
         if (scancode == 0x39 && !frozen) {
             frozen = true;
@@ -314,14 +332,20 @@ void game_on_mouse(struct packet *pp) {
                     int col = (mouse_x - GRID_START_X) / CELL_W;
                     int row = (mouse_y - GRID_START_Y) / CELL_H;
 
-                    int cost = (selected_plant == 1) ? 50 : 100;
+                    if (shovel_mode) {
+                        if (board_get_plant_type(row, col) != PLANT_NONE) {
+                            board_take_damage(row, col, 10000);
+                        }
+                    } else {
+                        int cost = (selected_plant == 1) ? 50 : 100;
 
-                    if (suns_count >= cost) {
-                        plant_type_t p_type = (selected_plant == 1) ? PLANT_SUNFLOWER : PLANT_PEASHOOTER;
-                        
-                        if (board_place_plant(row, col, p_type)) {
-                            suns_count -= cost;
-                            suns_spent += cost;
+                        if (suns_count >= cost) {
+                            plant_type_t p_type = (selected_plant == 1) ? PLANT_SUNFLOWER : PLANT_PEASHOOTER;
+                            
+                            if (board_place_plant(row, col, p_type)) {
+                                suns_count -= cost;
+                                suns_spent += cost;
+                            }
                         }
                     }
                 }

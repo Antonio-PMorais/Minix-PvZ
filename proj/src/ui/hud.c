@@ -3,7 +3,7 @@
 #include "v_card.h"
 #include "game_state.h"
 
-void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_frozen, rtc_date *time) {
+void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_frozen, bool is_shovel_mode, rtc_date *time) {
     // top bar
     vg_draw_rectangle(0, 0, 800, 100, 0x3b4d24);
 
@@ -16,6 +16,9 @@ void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_froze
 
     font_draw_string("LVL:", 400, 15, 0xFFFFFF);
     font_draw_number(lvl, 450, 15, 0xFFFFFF);
+
+    uint32_t shovel_color = is_shovel_mode ? 0xFFAA00 : 0x888888;
+    font_draw_string("R-SHOVEL", 520, 15, shovel_color);
 
     // plants
     uint32_t sun_color = (selected_plant == 1) ? 0xFFFF00 : 0x888888;
