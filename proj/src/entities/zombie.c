@@ -38,7 +38,7 @@ void spawn_zombie(uint8_t lane, int level) {
             zombies[i].active = true;
             zombies[i].x = 780;
             zombies[i].lane = lane;
-            zombies[i].hp = 250 + level * 20;
+            zombies[i].hp = 200 + level * 20;
             zombies[i].speed = 2;
             zombies[i].eating = false;
             zombies[i].eat_timer = 0;
