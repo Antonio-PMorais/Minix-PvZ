@@ -3,7 +3,7 @@ PROG = proj
 
 VPATH = src:src/entities:src/drivers:src/ui:src/sprites:src/drivers
 
-SRCS = proj.c game.c menu.c font.c board.c background.c hud.c sunflower.c peashooter.c zombie.c sun.c projectile.c wave_manager.c name_input.c
+SRCS = proj.c game.c menu.c font.c board.c background.c hud.c sunflower.c peashooter.c zombie.c sun.c projectile.c wave_manager.c name_input.c scoreboard.c
 
 # Labs
 LAB1_DIR = ../lab1

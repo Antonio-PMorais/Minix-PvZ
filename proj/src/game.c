@@ -18,6 +18,8 @@
 #include "projectile.h"
 #include "wave_manager.h"
 #include "name_input.h"
+#include "scoreboard.h"
+ 
 
 int suns_count = 150;
 int score = 0;
@@ -29,6 +31,10 @@ bool frozen = false;
 
 #define COLOR_BG      0x228B22
 #define COLOR_CURSOR  0xFFFFFF
+#define SQ_SIZE 60
+#define SQ_GAP 20
+#define SQ_START_X 210
+#define SQ_START_Y 200
 
 static GameState current_state = MAIN_MENU;
 
@@ -61,6 +67,7 @@ void game_init() {
     mouse_y = SCREEN_H / 2;
 
     name_input_init(); // Kept from incoming branch
+    scoreboard_init();
 
     suns_count = 150;
     score = 0;
@@ -109,6 +116,16 @@ void game_update() {
         wave_manager_update();
 
         if (wave_manager_is_complete()) {
+            rtc_date now;
+            rtc_read_date(&now);
+            
+            scoreboard_add(
+                 name_input_get_name(),
+                current_level,
+                score,
+                suns_spent,
+                &now
+    );
             game_change_state(LEVEL_COMPLETE);
         }
 
@@ -126,7 +143,8 @@ void game_update() {
         if (game_over) {
             rtc_read_date(&current_time);
             current_state = GAME_OVER;
-        }
+        }    
+
 
         rtc_timer++;
         if (rtc_timer >= 60) {
@@ -179,6 +197,10 @@ void game_render() {
         ui_render_game_over(suns_spent);
     }
 
+    else if (current_state == SCOREBOARD) {
+        scoreboard_render();
+    }
+
     vg_draw_rectangle(mouse_x - CURSOR_SIZE / 2, mouse_y - 1, CURSOR_SIZE, 2, COLOR_CURSOR);
     vg_draw_rectangle(mouse_x - 1, mouse_y - CURSOR_SIZE / 2, 2, CURSOR_SIZE, COLOR_CURSOR);
 
@@ -196,7 +218,7 @@ void game_on_key(uint8_t scancode) {
 
     else if (current_state == NAME_INPUT) {
         if (name_input_on_key(scancode)) {
-            game_change_state(LEVEL_SELECT);
+            game_change_state(PLAYING);
         }
 
         if (scancode == ESC_BREAKCODE) {
@@ -236,6 +258,12 @@ void game_on_key(uint8_t scancode) {
             current_state = MAIN_MENU;
         }
     }
+    else if (current_state == SCOREBOARD) {
+        if (scancode == ESC_BREAKCODE) {
+            current_state = MAIN_MENU;
+        }
+    }
+    
 }
 
 void game_on_mouse(struct packet *pp) {
