@@ -5,7 +5,15 @@
 #include "zombie.h"
 #include "v_card.h"
 #include <stdio.h>
-#include "sprites/plants/peashooter/peashooter.xpm"
+#include "animated_sprite.h"
+#include "sprites/plants/peashooter/peashooter_idle_1.xpm"
+#include "sprites/plants/peashooter/peashooter_idle_2.xpm"
+#include "sprites/plants/peashooter/peashooter_idle_3.xpm"
+#include "sprites/plants/peashooter/peashooter_idle_4.xpm"
+#include "sprites/plants/peashooter/peashooter_idle_5.xpm"
+#include "sprites/plants/peashooter/peashooter_idle_6.xpm"
+#include "sprites/plants/peashooter/peashooter_idle_7.xpm"
+#include "sprites/plants/peashooter/peashooter_idle_8.xpm"
 
 #define MAX_PEASHOOTERS 45
 
@@ -17,12 +25,23 @@ typedef struct {
 } peashooter_t;
 
 static peashooter_t peashooters[MAX_PEASHOOTERS];
-static xpm_image_t peashooter_img;
-static uint8_t *peashooter_pixmap = NULL;
+static struct animated_sprite peashooter_idle_sprite;
 
 void peashooters_init() {
     for (int i = 0; i < MAX_PEASHOOTERS; i++) peashooters[i].active = false;
-    peashooter_pixmap = xpm_load((xpm_map_t) peashooter_xpm, XPM_8_8_8_8, &peashooter_img);
+
+    char **peashooter_idle_frames[] = {
+        peashooter_idle_1_xpm,
+        peashooter_idle_2_xpm,
+        peashooter_idle_3_xpm,
+        peashooter_idle_4_xpm,
+        peashooter_idle_5_xpm,
+        peashooter_idle_6_xpm,
+        peashooter_idle_7_xpm,
+        peashooter_idle_8_xpm,
+    };
+
+    init_animated_sprite(&peashooter_idle_sprite, 8, 5, peashooter_idle_frames, XPM_8_8_8_8);
 }
 
 bool peashooters_spawn(int row, int col) {
@@ -60,15 +79,16 @@ void peashooters_update() {
 }
 
 void peashooters_render() {
-    if (peashooter_pixmap == NULL) return;
+    if (get_animated_sprite_pixmap(&peashooter_idle_sprite) == NULL) return;
     for (int i = 0; i < MAX_PEASHOOTERS; i++) {
         if (!peashooters[i].active) continue;
         int cell_x = GRID_START_X + peashooters[i].col * CELL_W;
         int cell_y = GRID_START_Y + peashooters[i].row * CELL_H;
-        int draw_x = cell_x + (CELL_W - peashooter_img.width) / 2;
-        int draw_y = cell_y + (CELL_H - peashooter_img.height) / 2;
-        vg_draw_xpm(peashooter_img, peashooter_pixmap, draw_x, draw_y);
+        int draw_x = cell_x + (CELL_W - get_animated_sprite_image(&peashooter_idle_sprite).width) / 2;
+        int draw_y = cell_y + (CELL_H - get_animated_sprite_image(&peashooter_idle_sprite).height) / 2;
+        vg_draw_xpm(get_animated_sprite_image(&peashooter_idle_sprite), get_animated_sprite_pixmap(&peashooter_idle_sprite), draw_x, draw_y);
     }
+    tick_animated_sprite(&peashooter_idle_sprite);
 }
 
 void peashooters_take_damage(int row, int col, int damage) {
