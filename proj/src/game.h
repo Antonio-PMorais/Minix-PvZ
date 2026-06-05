@@ -11,7 +11,8 @@ typedef enum {
     PLAYING,
     LEVEL_COMPLETE,
     LEVEL_SELECT,
-    GAME_OVER
+    GAME_OVER,
+    SCOREBOARD
 } GameState;
 
 void game_init();
@@ -30,3 +31,4 @@ void game_set_quit();
 void level_select_render(int mouse_x, int mouse_y);
 
 #endif
+
