@@ -17,11 +17,4 @@ all: ${PROG} lib
 lib: ${LIB_OBJS}
 	ar rcs ${LIB_NAME} ${LIB_OBJS}
 
-# Explicit rules for the object files
-rtc.o: rtc.c
-	${CC} ${CFLAGS} ${CPPFLAGS} -c rtc.c -o rtc.o
-
-bitwise.o: bitwise.c
-	${CC} ${CFLAGS} ${CPPFLAGS} -c bitwise.c -o bitwise.o
-
 .include <minix.lcom.mk>
