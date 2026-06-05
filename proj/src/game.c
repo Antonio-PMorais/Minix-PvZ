@@ -95,6 +95,8 @@ void game_init() {
     suns_init();
     cooldowns_init();
 
+    hud_init();
+
     rtc_read_date(&current_time);
     srand(current_time.seconds + current_time.minutes * 60);
 }
