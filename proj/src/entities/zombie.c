@@ -3,7 +3,7 @@
 #include "game_state.h"
 #include "board.h"
 #include <stdio.h>
-#include "sprites/zombie_default.xpm"
+#include "sprites/zombies/basic/zombie_basic.xpm"
 
 zombie_t zombies[MAX_ZOMBIES];
 static xpm_image_t zombie_default_img;

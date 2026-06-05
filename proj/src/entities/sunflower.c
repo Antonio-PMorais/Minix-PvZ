@@ -5,7 +5,7 @@
 #include "v_card.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "sprites/sunflower.xpm"
+#include "sprites/plants/sunflower/sunflower.xpm"
 
 #define MAX_SUNFLOWERS 45
 

@@ -5,7 +5,7 @@
 #include "zombie.h"
 #include "v_card.h"
 #include <stdio.h>
-#include "sprites/peashooter.xpm"
+#include "sprites/plants/peashooter/peashooter.xpm"
 
 #define MAX_PEASHOOTERS 45
 
