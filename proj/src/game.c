@@ -20,6 +20,7 @@
 #include "wave_manager.h"
 #include "name_input.h"
 #include "scoreboard.h"
+#include "plants_cooldown.h"
  
 
 int suns_count = 150;
@@ -92,6 +93,7 @@ void game_init() {
     zombies_init();
     projectiles_init();
     suns_init();
+    cooldowns_init();
 
     rtc_read_date(&current_time);
     srand(current_time.seconds + current_time.minutes * 60);
@@ -104,6 +106,7 @@ void game_init_level(int level_number) {
     zombies_init();
     projectiles_init();
     suns_init();
+    cooldowns_init();
 
     suns_count = 150; 
     score = 0;
@@ -146,6 +149,8 @@ void game_update() {
         peashooters_update();
         projectiles_update();
         suns_update();
+        cooldowns_update();
+
         bool game_over = zombies_update();
 
         if (game_over) {
@@ -338,13 +343,13 @@ void game_on_mouse(struct packet *pp) {
                         }
                     } else {
                         int cost = (selected_plant == 1) ? 50 : 100;
+                        plant_type_t p_type = (selected_plant == 1) ? PLANT_SUNFLOWER : PLANT_PEASHOOTER;
 
-                        if (suns_count >= cost) {
-                            plant_type_t p_type = (selected_plant == 1) ? PLANT_SUNFLOWER : PLANT_PEASHOOTER;
-                            
+                        if (suns_count >= cost && cooldown_is_ready(p_type)) {
                             if (board_place_plant(row, col, p_type)) {
                                 suns_count -= cost;
                                 suns_spent += cost;
+                                cooldown_start(p_type);
                             }
                         }
                     }
