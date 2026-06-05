@@ -5,14 +5,14 @@
 #include "plants_cooldown.h"
 #include "board.h"
 
-#include "../sprites/peashooter_icon_loaded_selected.xpm"
-#include "../sprites/peashooter_icon_loaded_unselected.xpm"
-#include "../sprites/peashooter_icon_unloaded_selected.xpm"
-#include "../sprites/peashooter_icon_unloaded_unselected.xpm"
-#include "../sprites/sunflower_icon_loaded_selected.xpm"
-#include "../sprites/sunflower_icon_loaded_unselected.xpm"
-#include "../sprites/sunflower_icon_unloaded_selected.xpm"
-#include "../sprites/sunflower_icon_unloaded_unselected.xpm"
+#include "../sprites/plants/peashooter/peashooter_icon_loaded_selected.xpm"
+#include "../sprites/plants/peashooter/peashooter_icon_loaded_unselected.xpm"
+#include "../sprites/plants/peashooter/peashooter_icon_unloaded_selected.xpm"
+#include "../sprites/plants/peashooter/peashooter_icon_unloaded_unselected.xpm"
+#include "../sprites/plants/sunflower/sunflower_icon_loaded_selected.xpm"
+#include "../sprites/plants/sunflower/sunflower_icon_loaded_unselected.xpm"
+#include "../sprites/plants/sunflower/sunflower_icon_unloaded_selected.xpm"
+#include "../sprites/plants/sunflower/sunflower_icon_unloaded_unselected.xpm"
 
 static xpm_image_t pea_ls_img, pea_lu_img, pea_us_img, pea_uu_img;
 static uint8_t *pea_ls_pix = NULL, *pea_lu_pix = NULL, *pea_us_pix = NULL, *pea_uu_pix = NULL;

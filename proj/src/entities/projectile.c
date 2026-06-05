@@ -3,7 +3,7 @@
 #include "game_state.h"
 #include "zombie.h"
 #include <stdio.h>
-#include "sprites/peashooter_projectile.xpm"
+#include "sprites/plants/peashooter/peashooter_projectile.xpm"
 
 #define MAX_PROJECTILES 30
 
