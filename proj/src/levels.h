@@ -106,8 +106,9 @@ static const LevelConfig ALL_LEVELS[] = {
     // LEVEL 6 - bigger waves, shorter breaks
     {
         .initial_delay = 8,
-        .total_waves = 6,
+        .total_waves = 7,
         .waves = {
+            { .num_zombies = 1, .spawns = {{1, 2}}, .time_to_next_wave = 20 },
             { .num_zombies = 1, .spawns = {{1, 3}}, .time_to_next_wave = 18 },
             { .num_zombies = 4, .spawns = {{1,0},{1,1},{1,3},{1,4}}, .time_to_next_wave = 8 },
             { .num_zombies = 5, .spawns = {{1,0},{1,1},{1,2},{1,3},{1,4}}, .time_to_next_wave = 6 },
@@ -120,8 +121,9 @@ static const LevelConfig ALL_LEVELS[] = {
     // LEVEL 7 - double zombies in lanes
     {
         .initial_delay = 8,
-        .total_waves = 6,
+        .total_waves = 7,
         .waves = {
+            { .num_zombies = 1, .spawns = {{1, 2}}, .time_to_next_wave = 18 },
             { .num_zombies = 1, .spawns = {{1, 3}}, .time_to_next_wave = 18 },
             { .num_zombies = 4, .spawns = {{1,0},{1,0},{1,2},{1,4}}, .time_to_next_wave = 8 },
             { .num_zombies = 6, .spawns = {{1,0},{1,1},{1,1},{1,2},{1,3},{1,4}}, .time_to_next_wave = 6 },
@@ -134,8 +136,9 @@ static const LevelConfig ALL_LEVELS[] = {
     // LEVEL 8 - heavy assault
     {
         .initial_delay = 7,
-        .total_waves = 7,
+        .total_waves = 8,
         .waves = {
+            { .num_zombies = 1, .spawns = {{1, 1}}, .time_to_next_wave = 18 },
             { .num_zombies = 1, .spawns = {{1, 3}}, .time_to_next_wave = 18 },
             { .num_zombies = 5, .spawns = {{1,0},{1,1},{1,2},{1,3},{1,4}}, .time_to_next_wave = 6 },
             { .num_zombies = 5, .spawns = {{1,0},{1,1},{1,2},{1,3},{1,4}}, .time_to_next_wave = 6 },
@@ -149,8 +152,9 @@ static const LevelConfig ALL_LEVELS[] = {
     // LEVEL 9 - fast and relentless
     {
         .initial_delay = 6,
-        .total_waves = 8,
+        .total_waves = 9,
         .waves = {
+            { .num_zombies = 1, .spawns = {{1, 4}}, .time_to_next_wave = 18 },
             { .num_zombies = 1, .spawns = {{1, 3}}, .time_to_next_wave = 18 },
             { .num_zombies = 5, .spawns = {{1,0},{1,1},{1,2},{1,3},{1,4}}, .time_to_next_wave = 6 },
             { .num_zombies = 6, .spawns = {{1,0},{1,0},{1,1},{1,2},{1,3},{1,4}}, .time_to_next_wave = 4 },
@@ -165,8 +169,9 @@ static const LevelConfig ALL_LEVELS[] = {
     // LEVEL 10 - final level, maximum difficulty
     {
         .initial_delay = 5,
-        .total_waves = 9,
+        .total_waves = 10,
         .waves = {
+            { .num_zombies = 1, .spawns = {{1, 2}}, .time_to_next_wave = 18 },
             { .num_zombies = 1, .spawns = {{1, 3}}, .time_to_next_wave = 18 },
             { .num_zombies = 5, .spawns = {{1,0},{1,1},{1,2},{1,3},{1,4}}, .time_to_next_wave = 6 },
             { .num_zombies = 6, .spawns = {{1,0},{1,0},{1,1},{1,2},{1,3},{1,4}}, .time_to_next_wave = 4 },
