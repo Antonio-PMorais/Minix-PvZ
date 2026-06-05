@@ -4,16 +4,25 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "sprites/sun.xpm"
+#include "sprites/sun_fading.xpm"
+
+#define SUN_BLINK_THRESHOLD 180
+#define SUN_BLINK_PERIOD 15
 
 static sun_t suns_array[MAX_SUNS];
 static xpm_image_t sun_img;
 static uint8_t *sun_pixmap = NULL;
+static xpm_image_t sun_fade_img;
+static uint8_t *sun_fade_pixmap = NULL;
 
 void suns_init() {
     for (int i = 0; i < MAX_SUNS; i++) suns_array[i].active = false;
     
     sun_pixmap = xpm_load((xpm_map_t) sun_xpm, XPM_8_8_8_8, &sun_img);
     if (sun_pixmap == NULL) printf("Error loading sun xpm.\n");
+
+    sun_fade_pixmap = xpm_load((xpm_map_t) sun_fading_xpm, XPM_8_8_8_8, &sun_fade_img);
+    if (sun_fade_pixmap == NULL) printf("Error loading sun fading xpm.\n");
 }
 
 void spawn_sun(int16_t x, int16_t start_y, int16_t target_y) {
@@ -51,10 +60,17 @@ void suns_update() {
 void suns_render() {
     for (int i = 0; i < MAX_SUNS; i++) {
         if (!suns_array[i].active) continue;
-        if (sun_pixmap != NULL) {
-            int draw_x = suns_array[i].x - (sun_img.width / 2);
-            int draw_y = suns_array[i].y - (sun_img.height / 2);
-            vg_draw_xpm(sun_img, sun_pixmap, draw_x, draw_y);
+
+        bool use_fade = suns_array[i].lifetime <= SUN_BLINK_THRESHOLD &&
+                        ((suns_array[i].lifetime / SUN_BLINK_PERIOD) % 2 == 0);
+
+        xpm_image_t current_img = use_fade && sun_fade_pixmap != NULL ? sun_fade_img : sun_img;
+        uint8_t *current_pixmap = use_fade && sun_fade_pixmap != NULL ? sun_fade_pixmap : sun_pixmap;
+
+        if (current_pixmap != NULL) {
+            int draw_x = suns_array[i].x - (current_img.width / 2);
+            int draw_y = suns_array[i].y - (current_img.height / 2);
+            vg_draw_xpm(current_img, current_pixmap, draw_x, draw_y);
         }
     }
 }
