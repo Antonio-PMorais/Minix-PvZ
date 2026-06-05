@@ -194,9 +194,15 @@ void game_render() {
         ui_render_hud(suns_count, score, current_level, selected_plant, frozen, shovel_mode, &current_time);
 
         // Render player name from incoming branch
-        const char *player_name = name_input_get_name();
-        if (player_name[0] != '\0') {
-            font_draw_string(player_name, 500, 40, 0xCCCCCC);
+        int name_len = name_input_get_length();
+        if (name_len > 0) {
+            const char *player_name = name_input_get_name();
+            
+            int name_width = name_len * 12;
+            
+            int draw_x = 728 - (name_width / 2);
+            
+            font_draw_string(player_name, draw_x, 40, 0xCCCCCC);
         }
     }
     else if (current_state == LEVEL_COMPLETE) {
@@ -265,8 +271,12 @@ void game_on_key(uint8_t scancode) {
         }
 
         if (scancode == 0x39 && !frozen) {
-            frozen = true;
-            freeze_timer = 180;
+            if (suns_count >= 75) {
+                suns_count -= 75;
+                suns_spent += 75;
+                frozen = true;
+                freeze_timer = 180;
+            }
         }
 
     } else if (current_state == LEVEL_COMPLETE) {

@@ -106,6 +106,12 @@ void ui_render_hud(int suns, int scr, int lvl, int selected_plant, bool is_froze
 
     if (is_frozen) {
         font_draw_string("FROZEN", 500, 60, 0x0000FF);
+    } else {
+        uint32_t freeze_color = (suns >= 75) ? 0x00FFFF : 0x888888; 
+        
+        font_draw_string("SPACE-FREEZE", 340, 50, freeze_color);
+        
+        font_draw_string("75 SUNS", 376, 70, freeze_color);
     }
 
     if (time != NULL) {
