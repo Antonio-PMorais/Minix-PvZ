@@ -4,8 +4,8 @@ static int plant_cooldown_timers[3];
 
 void cooldowns_init() {
     plant_cooldown_timers[0] = 0;
-    plant_cooldown_timers[PLANT_SUNFLOWER] = COOLDOWN_FAST;
-    plant_cooldown_timers[PLANT_PEASHOOTER] = COOLDOWN_FAST;
+    plant_cooldown_timers[PLANT_SUNFLOWER] = 0;
+    plant_cooldown_timers[PLANT_PEASHOOTER] = 0;
 }
 
 void cooldowns_update() {
